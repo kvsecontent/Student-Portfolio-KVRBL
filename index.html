@@ -63,15 +63,20 @@
         .login-logo {
             width: 80px;
             height: 80px;
-            background-color: var(--accent);
             border-radius: 50%;
+            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--primary);
-            font-weight: bold;
-            font-size: 32px;
             margin: 0 auto 20px;
+            background-color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .login-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .login-title {
@@ -173,14 +178,19 @@
         .school-logo {
             width: 60px;
             height: 60px;
-            background-color: var(--accent);
             border-radius: 50%;
+            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--primary);
-            font-weight: bold;
-            font-size: 24px;
+            background-color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .school-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .school-name {
@@ -608,7 +618,6 @@
             .school-logo {
                 width: 50px;
                 height: 50px;
-                font-size: 20px;
             }
 
             .student-name {
@@ -695,7 +704,9 @@
     <!-- Login Overlay -->
     <div class="login-overlay" id="loginOverlay">
         <div class="login-card">
-            <div class="login-logo">KV</div>
+            <div class="login-logo">
+                <img src="https://imgur.com/GxoHln6.png" alt="School Logo">
+            </div>
             <h2 class="login-title">Student Portfolio</h2>
             <p class="login-subtitle">PM SHRI Kendriya Vidyalya, Raebareli</p>
             
@@ -716,7 +727,9 @@
         <header>
             <div class="header-container container">
                 <div class="school-info">
-                    <div class="school-logo">KV</div>
+                    <div class="school-logo">
+                        <img src="https://imgur.com/GxoHln6.png" alt="School Logo">
+                    </div>
                     <div class="school-name">
                         <h1>PM SHRI Kendriya Vidyalya</h1>
                         <p>Raebareli</p>
@@ -1065,6 +1078,16 @@
     </div>
 
     <script>
+        // Handle student photo loading errors
+        document.addEventListener('DOMContentLoaded', function() {
+            const studentPhoto = document.getElementById('studentPhoto');
+            
+            studentPhoto.onerror = function() {
+                console.log('Student photo failed to load, using placeholder');
+                this.src = 'https://imgur.com/GxoHln6.png';  // Show school logo as fallback
+            };
+        });
+        
         // Login form handling
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Document loaded, initializing login form');
