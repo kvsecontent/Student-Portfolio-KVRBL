@@ -36,6 +36,118 @@
             padding: 0 20px;
         }
 
+        /* Login Styles */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(241, 245, 249, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            width: 90%;
+            max-width: 400px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 32px;
+            margin: 0 auto 20px;
+        }
+
+        .login-title {
+            font-size: 24px;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .login-subtitle {
+            font-size: 16px;
+            color: #6b7280;
+            margin-bottom: 25px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .login-input {
+            padding: 12px 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .login-input.error {
+            border-color: var(--danger);
+        }
+
+        .login-error {
+            color: var(--danger);
+            font-size: 14px;
+            margin-top: -5px;
+            text-align: left;
+            display: none;
+        }
+
+        .login-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background-color: var(--secondary);
+        }
+
+        .login-footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .main-content {
+            display: none;
+        }
+
+        .main-content.authenticated {
+            display: block;
+        }
+
         /* Header Styles */
         header {
             background-color: white;
@@ -537,118 +649,6 @@
             }
         }
 
-        /* Login Styles */
-        .login-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(241, 245, 249, 0.95);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .login-card {
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: var(--shadow);
-            width: 90%;
-            max-width: 400px;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .login-logo {
-            width: 80px;
-            height: 80px;
-            background-color: var(--accent);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--primary);
-            font-weight: bold;
-            font-size: 32px;
-            margin: 0 auto 20px;
-        }
-
-        .login-title {
-            font-size: 24px;
-            color: var(--dark);
-            margin-bottom: 10px;
-        }
-
-        .login-subtitle {
-            font-size: 16px;
-            color: #6b7280;
-            margin-bottom: 25px;
-        }
-
-        .login-form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .login-input {
-            padding: 12px 15px;
-            border: 1px solid #e5e7eb;
-            border-radius: 5px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
-        }
-
-        .login-input:focus {
-            outline: none;
-            border-color: var(--secondary);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-        }
-
-        .login-input.error {
-            border-color: var(--danger);
-        }
-
-        .login-error {
-            color: var(--danger);
-            font-size: 14px;
-            margin-top: -5px;
-            text-align: left;
-            display: none;
-        }
-
-        .login-btn {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 5px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .login-btn:hover {
-            background-color: var(--secondary);
-        }
-
-        .login-footer {
-            margin-top: 20px;
-            font-size: 14px;
-            color: #6b7280;
-        }
-
-        .main-content {
-            display: none;
-        }
-
-        .main-content.authenticated {
-            display: block;
-        }
-
         /* Print Styles */
         @media print {
             header button, 
@@ -699,10 +699,10 @@
             <h2 class="login-title">Student Portfolio</h2>
             <p class="login-subtitle">PM SHRI Kendriya Vidyalya, Raebareli</p>
             
-            <form class="login-form" id="loginForm">
+            <form class="login-form" id="loginForm" onsubmit="return false;">
                 <input type="text" class="login-input" id="admissionInput" placeholder="Enter 5-digit Admission Number" maxlength="5">
                 <div class="login-error" id="admissionError">Please enter a valid 5-digit admission number</div>
-                <button type="submit" class="login-btn">Access Portfolio</button>
+                <button type="button" class="login-btn" id="loginButton">Access Portfolio</button>
             </form>
             
             <div class="login-footer">
@@ -734,339 +734,409 @@
         </header>
 
         <main class="container">
-        <!-- Student Info -->
-        <section class="student-info-section">
-            <div class="student-photo">
-                <img src="/api/placeholder/120/120" alt="Student Photo" id="studentPhoto">
-            </div>
-            <div class="student-details">
-                <h2 class="student-name" id="studentName">Loading...</h2>
-                <div class="student-class" id="studentClass">Loading...</div>
-                <div class="student-basic-info">
-                    <div class="info-item">
-                        <div class="info-label">Admission No.</div>
-                        <div class="info-value" id="admissionNo">Loading...</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Roll No.</div>
-                        <div class="info-value" id="rollNo">Loading...</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Date of Birth</div>
-                        <div class="info-value" id="dob">Loading...</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Contact</div>
-                        <div class="info-value" id="contact">Loading...</div>
+            <!-- Student Info -->
+            <section class="student-info-section">
+                <div class="student-photo">
+                    <img src="/api/placeholder/120/120" alt="Student Photo" id="studentPhoto">
+                </div>
+                <div class="student-details">
+                    <h2 class="student-name" id="studentName">Loading...</h2>
+                    <div class="student-class" id="studentClass">Loading...</div>
+                    <div class="student-basic-info">
+                        <div class="info-item">
+                            <div class="info-label">Admission No.</div>
+                            <div class="info-value" id="admissionNo">Loading...</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Roll No.</div>
+                            <div class="info-value" id="rollNo">Loading...</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Date of Birth</div>
+                            <div class="info-value" id="dob">Loading...</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Contact</div>
+                            <div class="info-value" id="contact">Loading...</div>
+                        </div>
                     </div>
                 </div>
+            </section>
+
+            <!-- Navigation -->
+            <div class="nav-tabs">
+                <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
+                <div class="nav-tab" data-tab="subjects">Subject Activities</div>
+                <div class="nav-tab" data-tab="assignments">Assignments</div>
+                <div class="nav-tab" data-tab="tests">Tests & Assessments</div>
+                <div class="nav-tab" data-tab="corrections">Copy Corrections</div>
+                <div class="nav-tab" data-tab="attendance">Attendance</div>
             </div>
-        </section>
 
-        <!-- Navigation -->
-        <div class="nav-tabs">
-            <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
-            <div class="nav-tab" data-tab="subjects">Subject Activities</div>
-            <div class="nav-tab" data-tab="assignments">Assignments</div>
-            <div class="nav-tab" data-tab="tests">Tests & Assessments</div>
-            <div class="nav-tab" data-tab="corrections">Copy Corrections</div>
-            <div class="nav-tab" data-tab="attendance">Attendance</div>
-        </div>
+            <!-- Dashboard Section -->
+            <section class="content-section active" id="dashboard">
+                <div class="dashboard-summary">
+                    <div class="section-header">
+                        <h2 class="section-title">Academic Overview</h2>
+                    </div>
+                    <div class="summary-cards">
+                        <div class="summary-card">
+                            <div class="summary-icon icon-blue">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <div class="summary-info">
+                                <h3 id="totalSubjects">7</h3>
+                                <p>Subjects</p>
+                            </div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-icon icon-green">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="summary-info">
+                                <h3 id="completedAssignments">24</h3>
+                                <p>Completed Assignments</p>
+                            </div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-icon icon-yellow">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="summary-info">
+                                <h3 id="pendingAssignments">3</h3>
+                                <p>Pending Assignments</p>
+                            </div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-icon icon-red">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div class="summary-info">
+                                <h3 id="attendancePercentage">94.2%</h3>
+                                <p>Attendance</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        <!-- Dashboard Section -->
-        <section class="content-section active" id="dashboard">
-            <div class="dashboard-summary">
+                <!-- Progress Cards -->
                 <div class="section-header">
-                    <h2 class="section-title">Academic Overview</h2>
+                    <h2 class="section-title">Subject Performance</h2>
                 </div>
-                <div class="summary-cards">
-                    <div class="summary-card">
-                        <div class="summary-icon icon-blue">
-                            <i class="fas fa-book"></i>
-                        </div>
-                        <div class="summary-info">
-                            <h3 id="totalSubjects">7</h3>
-                            <p>Subjects</p>
-                        </div>
-                    </div>
-                    <div class="summary-card">
-                        <div class="summary-icon icon-green">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="summary-info">
-                            <h3 id="completedAssignments">24</h3>
-                            <p>Completed Assignments</p>
-                        </div>
-                    </div>
-                    <div class="summary-card">
-                        <div class="summary-icon icon-yellow">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <div class="summary-info">
-                            <h3 id="pendingAssignments">3</h3>
-                            <p>Pending Assignments</p>
-                        </div>
-                    </div>
-                    <div class="summary-card">
-                        <div class="summary-icon icon-red">
-                            <i class="fas fa-calendar-check"></i>
-                        </div>
-                        <div class="summary-info">
-                            <h3 id="attendancePercentage">94.2%</h3>
-                            <p>Attendance</p>
-                        </div>
+                <div class="progress-cards" id="subjectProgressCards">
+                    <!-- Will be populated by JavaScript -->
+                    <div class="loading">
+                        <div class="spinner"></div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Progress Cards -->
-            <div class="section-header">
-                <h2 class="section-title">Subject Performance</h2>
-            </div>
-            <div class="progress-cards" id="subjectProgressCards">
-                <!-- Will be populated by JavaScript -->
-                <div class="loading">
-                    <div class="spinner"></div>
+                <!-- Recent Tests -->
+                <div class="section-header">
+                    <h2 class="section-title">Recent Test Results</h2>
                 </div>
-            </div>
-
-            <!-- Recent Tests -->
-            <div class="section-header">
-                <h2 class="section-title">Recent Test Results</h2>
-            </div>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Subject</th>
-                            <th>Test Name</th>
-                            <th>Date</th>
-                            <th>Marks</th>
-                            <th>Grade</th>
-                        </tr>
-                    </thead>
-                    <tbody id="recentTestsTable">
-                        <!-- Will be populated by JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- Subjects Section -->
-        <section class="content-section" id="subjects">
-            <div class="section-header">
-                <h2 class="section-title">Subject Activities</h2>
-                <div class="section-actions">
-                    <select class="filter-dropdown" id="subjectFilter">
-                        <option value="all">All Subjects</option>
-                        <option value="Mathematics">Mathematics</option>
-                        <option value="Science">Science</option>
-                        <option value="English">English</option>
-                        <option value="Hindi">Hindi</option>
-                        <option value="Social Science">Social Science</option>
-                        <option value="Computer Science">Computer Science</option>
-                        <option value="Sanskrit">Sanskrit</option>
-                    </select>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Test Name</th>
+                                <th>Date</th>
+                                <th>Marks</th>
+                                <th>Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentTestsTable">
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Subject</th>
-                            <th>Activity</th>
-                            <th>Date</th>
-                            <th>Description</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="subjectActivitiesTable">
-                        <!-- Will be populated by JavaScript -->
-                        <tr>
-                            <td colspan="5" class="loading">
-                                <div class="spinner"></div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+            </section>
 
-        <!-- Assignments Section -->
-        <section class="content-section" id="assignments">
-            <div class="section-header">
-                <h2 class="section-title">Assignments</h2>
-                <div class="section-actions">
-                    <select class="filter-dropdown" id="assignmentStatusFilter">
-                        <option value="all">All Status</option>
-                        <option value="complete">Complete</option>
-                        <option value="pending">Pending</option>
-                        <option value="overdue">Overdue</option>
-                    </select>
+            <!-- Subjects Section -->
+            <section class="content-section" id="subjects">
+                <div class="section-header">
+                    <h2 class="section-title">Subject Activities</h2>
+                    <div class="section-actions">
+                        <select class="filter-dropdown" id="subjectFilter">
+                            <option value="all">All Subjects</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Science">Science</option>
+                            <option value="English">English</option>
+                            <option value="Hindi">Hindi</option>
+                            <option value="Social Science">Social Science</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Sanskrit">Sanskrit</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Subject</th>
-                            <th>Assignment</th>
-                            <th>Assigned Date</th>
-                            <th>Due Date</th>
-                            <th>Status</th>
-                            <th>Remarks</th>
-                        </tr>
-                    </thead>
-                    <tbody id="assignmentsTable">
-                        <!-- Will be populated by JavaScript -->
-                        <tr>
-                            <td colspan="6" class="loading">
-                                <div class="spinner"></div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- Tests Section -->
-        <section class="content-section" id="tests">
-            <div class="section-header">
-                <h2 class="section-title">Tests & Assessments</h2>
-                <div class="section-actions">
-                    <select class="filter-dropdown" id="testSubjectFilter">
-                        <option value="all">All Subjects</option>
-                        <option value="Mathematics">Mathematics</option>
-                        <option value="Science">Science</option>
-                        <option value="English">English</option>
-                        <option value="Hindi">Hindi</option>
-                        <option value="Social Science">Social Science</option>
-                        <option value="Computer Science">Computer Science</option>
-                        <option value="Sanskrit">Sanskrit</option>
-                    </select>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Activity</th>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subjectActivitiesTable">
+                            <!-- Will be populated by JavaScript -->
+                            <tr>
+                                <td colspan="5" class="loading">
+                                    <div class="spinner"></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Subject</th>
-                            <th>Test Name</th>
-                            <th>Date</th>
-                            <th>Max Marks</th>
-                            <th>Marks Obtained</th>
-                            <th>Percentage</th>
-                            <th>Grade</th>
-                        </tr>
-                    </thead>
-                    <tbody id="testsTable">
-                        <!-- Will be populated by JavaScript -->
-                        <tr>
-                            <td colspan="7" class="loading">
-                                <div class="spinner"></div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+            </section>
 
-        <!-- Copy Corrections Section -->
-        <section class="content-section" id="corrections">
-            <div class="section-header">
-                <h2 class="section-title">Copy Corrections</h2>
-                <div class="section-actions">
-                    <select class="filter-dropdown" id="correctionSubjectFilter">
-                        <option value="all">All Subjects</option>
-                        <option value="Mathematics">Mathematics</option>
-                        <option value="Science">Science</option>
-                        <option value="English">English</option>
-                        <option value="Hindi">Hindi</option>
-                        <option value="Social Science">Social Science</option>
-                        <option value="Computer Science">Computer Science</option>
-                        <option value="Sanskrit">Sanskrit</option>
-                    </select>
+            <!-- Assignments Section -->
+            <section class="content-section" id="assignments">
+                <div class="section-header">
+                    <h2 class="section-title">Assignments</h2>
+                    <div class="section-actions">
+                        <select class="filter-dropdown" id="assignmentStatusFilter">
+                            <option value="all">All Status</option>
+                            <option value="complete">Complete</option>
+                            <option value="pending">Pending</option>
+                            <option value="overdue">Overdue</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Subject</th>
-                            <th>Copy Type</th>
-                            <th>Correction Date</th>
-                            <th>Areas of Improvement</th>
-                            <th>Teacher's Remarks</th>
-                        </tr>
-                    </thead>
-                    <tbody id="correctionsTable">
-                        <!-- Will be populated by JavaScript -->
-                        <tr>
-                            <td colspan="5" class="loading">
-                                <div class="spinner"></div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- Attendance Section -->
-        <section class="content-section" id="attendance">
-            <div class="section-header">
-                <h2 class="section-title">Attendance Record</h2>
-                <div class="section-actions">
-                    <select class="filter-dropdown" id="attendanceMonthFilter">
-                        <option value="all">All Months</option>
-                        <option value="April">April</option>
-                        <option value="May">May</option>
-                        <option value="June">June</option>
-                        <option value="July">July</option>
-                        <option value="August">August</option>
-                        <option value="September">September</option>
-                        <option value="October">October</option>
-                        <option value="November">November</option>
-                        <option value="December">December</option>
-                        <option value="January">January</option>
-                        <option value="February">February</option>
-                        <option value="March">March</option>
-                    </select>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Assignment</th>
+                                <th>Assigned Date</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assignmentsTable">
+                            <!-- Will be populated by JavaScript -->
+                            <tr>
+                                <td colspan="6" class="loading">
+                                    <div class="spinner"></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Month</th>
-                            <th>Working Days</th>
-                            <th>Present</th>
-                            <th>Absent</th>
-                            <th>Percentage</th>
-                        </tr>
-                    </thead>
-                    <tbody id="attendanceTable">
-                        <!-- Will be populated by JavaScript -->
-                        <tr>
-                            <td colspan="5" class="loading">
-                                <div class="spinner"></div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    </main>
+            </section>
 
-        </div>
+            <!-- Tests Section -->
+            <section class="content-section" id="tests">
+                <div class="section-header">
+                    <h2 class="section-title">Tests & Assessments</h2>
+                    <div class="section-actions">
+                        <select class="filter-dropdown" id="testSubjectFilter">
+                            <option value="all">All Subjects</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Science">Science</option>
+                            <option value="English">English</option>
+                            <option value="Hindi">Hindi</option>
+                            <option value="Social Science">Social Science</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Sanskrit">Sanskrit</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Test Name</th>
+                                <th>Date</th>
+                                <th>Max Marks</th>
+                                <th>Marks Obtained</th>
+                                <th>Percentage</th>
+                                <th>Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody id="testsTable">
+                            <!-- Will be populated by JavaScript -->
+                            <tr>
+                                <td colspan="7" class="loading">
+                                    <div class="spinner"></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Copy Corrections Section -->
+            <section class="content-section" id="corrections">
+                <div class="section-header">
+                    <h2 class="section-title">Copy Corrections</h2>
+                    <div class="section-actions">
+                        <select class="filter-dropdown" id="correctionSubjectFilter">
+                            <option value="all">All Subjects</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Science">Science</option>
+                            <option value="English">English</option>
+                            <option value="Hindi">Hindi</option>
+                            <option value="Social Science">Social Science</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Sanskrit">Sanskrit</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Copy Type</th>
+                                <th>Correction Date</th>
+                                <th>Areas of Improvement</th>
+                                <th>Teacher's Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="correctionsTable">
+                            <!-- Will be populated by JavaScript -->
+                            <tr>
+                                <td colspan="5" class="loading">
+                                    <div class="spinner"></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Attendance Section -->
+            <section class="content-section" id="attendance">
+                <div class="section-header">
+                    <h2 class="section-title">Attendance Record</h2>
+                    <div class="section-actions">
+                        <select class="filter-dropdown" id="attendanceMonthFilter">
+                            <option value="all">All Months</option>
+                            <option value="April">April</option>
+                            <option value="May">May</option>
+                            <option value="June">June</option>
+                            <option value="July">July</option>
+                            <option value="August">August</option>
+                            <option value="September">September</option>
+                            <option value="October">October</option>
+                            <option value="November">November</option>
+                            <option value="December">December</option>
+                            <option value="January">January</option>
+                            <option value="February">February</option>
+                            <option value="March">March</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Month</th>
+                                <th>Working Days</th>
+                                <th>Present</th>
+                                <th>Absent</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceTable">
+                            <!-- Will be populated by JavaScript -->
+                            <tr>
+                                <td colspan="5" class="loading">
+                                    <div class="spinner"></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="container">
+                <p>&copy; 2024 PM SHRI Kendriya Vidyalya, Raebareli. All rights reserved.</p>
+            </div>
+        </footer>
     </div>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2024 PM SHRI Kendriya Vidyalya, Raebareli. All rights reserved.</p>
-        </div>
-    </footer>
-
     <script>
+        // Login form handling
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Document loaded, initializing login form');
+            
+            // Login button click handler
+            document.getElementById('loginButton').addEventListener('click', function() {
+                console.log('Login button clicked');
+                
+                const admissionInput = document.getElementById('admissionInput');
+                const admissionError = document.getElementById('admissionError');
+                const admissionNumber = admissionInput.value.trim();
+                
+                console.log('Admission number entered:', admissionNumber);
+                
+                // Validate: must be exactly 5 digits
+                const isValid = /^\d{5}$/.test(admissionNumber);
+                console.log('Is valid format:', isValid);
+                
+                if (isValid) {
+                    // Store authentication locally
+                    localStorage.setItem('kv_authenticated', 'true');
+                    localStorage.setItem('kv_admission_number', admissionNumber);
+                    
+                    // Hide login, show content
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    document.getElementById('mainContent').classList.add('authenticated');
+                    
+                    // Load student data
+                    initializeData();
+                } else {
+                    // Show error
+                    admissionInput.classList.add('error');
+                    admissionError.style.display = 'block';
+                }
+            });
+            
+            // Enter key handler for input field
+            document.getElementById('admissionInput').addEventListener('keyup', function(event) {
+                if (event.key === "Enter") {
+                    document.getElementById('loginButton').click();
+                }
+            });
+            
+            // Clear error on input focus
+            document.getElementById('admissionInput').addEventListener('focus', function() {
+                this.classList.remove('error');
+                document.getElementById('admissionError').style.display = 'none';
+            });
+            
+            // Check if user is already logged in
+            const isAuthenticated = localStorage.getItem('kv_authenticated');
+            if (isAuthenticated) {
+                console.log('User already authenticated, showing content');
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('mainContent').classList.add('authenticated');
+                initializeData(); // Load data for authenticated user
+            }
+        });
+        
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            console.log('Logout clicked');
+            localStorage.removeItem('kv_authenticated');
+            localStorage.removeItem('kv_admission_number');
+            location.reload();
+        });
+        
+        // Print functionality
+        document.getElementById('printBtn').addEventListener('click', () => {
+            window.print();
+        });
+
         // Tab Navigation
         document.querySelectorAll('.nav-tab').forEach(tab => {
             tab.addEventListener('click', () => {
@@ -1087,68 +1157,7 @@
             });
         });
 
-        // Login Validation
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check if user is already logged in
-            const isAuthenticated = localStorage.getItem('kv_authenticated');
-            if (isAuthenticated) {
-                document.getElementById('loginOverlay').style.display = 'none';
-                document.getElementById('mainContent').classList.add('authenticated');
-                initializeData(); // Load data for authenticated user
-            }
-            
-            // Handle login form submission
-            document.getElementById('loginForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const admissionInput = document.getElementById('admissionInput');
-                const admissionError = document.getElementById('admissionError');
-                const admissionNumber = admissionInput.value.trim();
-                
-                // Validate: must be exactly 5 digits
-                const isValid = /^\d{5}$/.test(admissionNumber);
-                
-                if (isValid) {
-                    // Store authentication locally - no backend session needed
-                    localStorage.setItem('kv_authenticated', 'true');
-                    localStorage.setItem('kv_admission_number', admissionNumber);
-                    
-                    // Hide login, show content
-                    document.getElementById('loginOverlay').style.display = 'none';
-                    document.getElementById('mainContent').classList.add('authenticated');
-                    
-                    // Load student data
-                    initializeData();
-                } else {
-                    // Show error
-                    admissionInput.classList.add('error');
-                    admissionError.style.display = 'block';
-                }
-            });
-            
-            // Clear error on input focus
-            document.getElementById('admissionInput').addEventListener('focus', function() {
-                this.classList.remove('error');
-                document.getElementById('admissionError').style.display = 'none';
-            });
-        });
-        
-        // Logout functionality
-        document.getElementById('logoutBtn').addEventListener('click', function() {
-            localStorage.removeItem('kv_authenticated');
-            localStorage.removeItem('kv_admission_number');
-            location.reload();
-        });
-        
-        // Print functionality
-        document.getElementById('printBtn').addEventListener('click', () => {
-            window.print();
-        });
-
-        // Google Sheets API Integration
-        // Note: In a real implementation, you would fetch these values from your backend (render.com)
-        // For demonstration, we'll use placeholder data and simulate API behavior
-        
+        // IMPROVED: Fetch data function with better error handling
         async function fetchData() {
             const API_BASE_URL = 'https://student-portfolio-api.onrender.com';
             
@@ -1157,111 +1166,69 @@
                 const admissionNumber = localStorage.getItem('kv_admission_number');
                 console.log(`Fetching data for admission number: ${admissionNumber}`);
                 
+                // First check if API is available
+                try {
+                    const statusResponse = await fetch(`${API_BASE_URL}/api/status`);
+                    const statusData = await statusResponse.json();
+                    console.log('API Status:', statusData);
+                } catch (statusError) {
+                    console.error('API Status Check Failed:', statusError);
+                }
+                
                 // Direct API call to fetch student data
+                console.log(`Making request to: ${API_BASE_URL}/api/student-data?admission=${admissionNumber}`);
                 const dataResponse = await fetch(`${API_BASE_URL}/api/student-data?admission=${admissionNumber}`);
                 
                 if (!dataResponse.ok) {
-                    throw new Error('Failed to fetch student data');
+                    const errorText = await dataResponse.text();
+                    console.error('API Error Response:', errorText);
+                    throw new Error(`Failed to fetch student data: ${dataResponse.status} ${dataResponse.statusText}`);
                 }
                 
-                return await dataResponse.json();
+                const data = await dataResponse.json();
+                console.log('Successfully received data:', data);
+                return data;
             } catch (error) {
                 console.error('Error fetching data:', error);
                 
+                // Show error message to user
+                alert(`Error loading data: ${error.message}. Please try again later.`);
+                
                 // For development/fallback, return mock data
                 await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            // Mock data - in production this would come from Google Sheets API
-            return {
-                studentInfo: {
-                    name: "Amit Kumar Singh",
-                    class: "Class X-A",
-                    admissionNo: "KV2023/456",
-                    rollNo: "24",
-                    dob: "12-08-2009",
-                    contact: "+91 9876543210",
-                    photoUrl: "/api/placeholder/120/120" // In production, this would be a real URL
-                },
-                subjectProgress: [
-                    { subject: "Mathematics", progress: 85, grade: "A" },
-                    { subject: "Science", progress: 78, grade: "B" },
-                    { subject: "English", progress: 92, grade: "A" },
-                    { subject: "Hindi", progress: 88, grade: "A" },
-                    { subject: "Social Science", progress: 75, grade: "B" },
-                    { subject: "Computer Science", progress: 95, grade: "A" },
-                    { subject: "Sanskrit", progress: 82, grade: "B" }
-                ],
-                recentTests: [
-                    { subject: "Mathematics", name: "Unit Test 3", date: "15-03-2024", marks: "45/50", percentage: 90, grade: "A" },
-                    { subject: "Science", name: "Practical Assessment", date: "10-03-2024", marks: "38/50", percentage: 76, grade: "B" },
-                    { subject: "English", name: "Grammar Quiz", date: "08-03-2024", marks: "23/25", percentage: 92, grade: "A" },
-                    { subject: "Hindi", name: "Half Yearly", date: "20-02-2024", marks: "85/100", percentage: 85, grade: "A" },
-                    { subject: "Social Science", name: "Map Skills Test", date: "18-02-2024", marks: "18/25", percentage: 72, grade: "B" }
-                ],
-                subjectActivities: [
-                    { subject: "Mathematics", activity: "Geometry Workshop", date: "18-03-2024", description: "Practical session on constructions", status: "complete" },
-                    { subject: "Science", activity: "Lab Experiment", date: "12-03-2024", description: "Chemical reactions demonstration", status: "complete" },
-                    { subject: "English", activity: "Debate Competition", date: "25-03-2024", description: "Topic: Technology in Education", status: "pending" },
-                    { subject: "Computer Science", activity: "Coding Project", date: "20-03-2024", description: "Simple calculator program", status: "complete" },
-                    { subject: "Hindi", activity: "Poetry Recitation", date: "15-03-2024", description: "Recitation of poems by famous poets", status: "complete" },
-                    { subject: "Social Science", activity: "Map Activity", date: "10-03-2024", description: "India's geographical features marking", status: "complete" },
-                    { subject: "Mathematics", activity: "Math Olympiad", date: "30-03-2024", description: "School level competition", status: "pending" },
-                    { subject: "Sanskrit", activity: "Group Reading", date: "05-03-2024", description: "Chapter 7 reading and translation", status: "complete" }
-                ],
-                assignments: [
-                    { subject: "Mathematics", name: "Trigonometry Worksheet", assignedDate: "15-03-2024", dueDate: "20-03-2024", status: "complete", remarks: "Well done!" },
-                    { subject: "Science", name: "Physics Numerical Set", assignedDate: "12-03-2024", dueDate: "18-03-2024", status: "complete", remarks: "Good work" },
-                    { subject: "English", name: "Essay Writing", assignedDate: "10-03-2024", dueDate: "17-03-2024", status: "complete", remarks: "Excellent vocabulary" },
-                    { subject: "Hindi", name: "Grammar Exercise", assignedDate: "08-03-2024", dueDate: "15-03-2024", status: "complete", remarks: "Needs improvement" },
-                    { subject: "Social Science", name: "History Timeline", assignedDate: "05-03-2024", dueDate: "12-03-2024", status: "complete", remarks: "Very detailed" },
-                    { subject: "Computer Science", name: "Algorithm Design", assignedDate: "18-03-2024", dueDate: "25-03-2024", status: "pending", remarks: "" },
-                    { subject: "Sanskrit", name: "Translation Exercise", assignedDate: "16-03-2024", dueDate: "23-03-2024", status: "pending", remarks: "" },
-                    { subject: "Mathematics", name: "Statistics Project", assignedDate: "20-03-2024", dueDate: "27-03-2024", status: "pending", remarks: "" },
-                    { subject: "Science", name: "Biology Diagram", assignedDate: "01-03-2024", dueDate: "08-03-2024", status: "overdue", remarks: "Not submitted" }
-                ],
-                tests: [
-                    { subject: "Mathematics", name: "Unit Test 3", date: "15-03-2024", maxMarks: 50, marksObtained: 45, percentage: 90, grade: "A" },
-                    { subject: "Mathematics", name: "Unit Test 2", date: "15-02-2024", maxMarks: 50, marksObtained: 42, percentage: 84, grade: "B" },
-                    { subject: "Mathematics", name: "Unit Test 1", date: "15-01-2024", maxMarks: 50, marksObtained: 47, percentage: 94, grade: "A" },
-                    { subject: "Science", name: "Practical Assessment", date: "10-03-2024", maxMarks: 50, marksObtained: 38, percentage: 76, grade: "B" },
-                    { subject: "Science", name: "Theory Test", date: "05-03-2024", maxMarks: 80, marksObtained: 68, percentage: 85, grade: "A" },
-                    { subject: "English", name: "Grammar Quiz", date: "08-03-2024", maxMarks: 25, marksObtained: 23, percentage: 92, grade: "A" },
-                    { subject: "English", name: "Reading Comprehension", date: "20-02-2024", maxMarks: 30, marksObtained: 25, percentage: 83, grade: "B" },
-                    { subject: "Hindi", name: "Half Yearly", date: "20-02-2024", maxMarks: 100, marksObtained: 85, percentage: 85, grade: "A" },
-                    { subject: "Social Science", name: "Map Skills Test", date: "18-02-2024", maxMarks: 25, marksObtained: 18, percentage: 72, grade: "B" },
-                    { subject: "Computer Science", name: "Practical Exam", date: "25-02-2024", maxMarks: 50, marksObtained: 47, percentage: 94, grade: "A" },
-                    { subject: "Sanskrit", name: "Quarterly Test", date: "12-01-2024", maxMarks: 50, marksObtained: 41, percentage: 82, grade: "B" }
-                ],
-                corrections: [
-                    { subject: "Mathematics", copyType: "Classwork Notebook", date: "16-03-2024", improvements: "Improve presentation of solutions", remarks: "Good calculations but work on steps" },
-                    { subject: "Science", copyType: "Lab Record", date: "14-03-2024", improvements: "Better diagrams needed", remarks: "Neat work but incomplete in some parts" },
-                    { subject: "English", copyType: "Grammar Notebook", date: "12-03-2024", improvements: "More practice on tenses", remarks: "Good overall work" },
-                    { subject: "Hindi", copyType: "Literature Notebook", date: "10-03-2024", improvements: "Pay attention to spelling", remarks: "Content is good" },
-                    { subject: "Social Science", copyType: "Project File", date: "08-03-2024", improvements: "Add more visual elements", remarks: "Well researched topic" },
-                    { subject: "Computer Science", copyType: "Practical File", date: "05-03-2024", improvements: "Better documentation of code", remarks: "Programs are working correctly" },
-                    { subject: "Sanskrit", copyType: "Exercise Book", date: "03-03-2024", improvements: "More attention to grammar rules", remarks: "Translation is improving" }
-                ],
-                attendance: [
-                    { month: "March", workingDays: 23, present: 22, absent: 1, percentage: 95.7 },
-                    { month: "February", workingDays: 20, present: 18, absent: 2, percentage: 90.0 },
-                    { month: "January", workingDays: 22, present: 21, absent: 1, percentage: 95.5 },
-                    { month: "December", workingDays: 18, present: 17, absent: 1, percentage: 94.4 },
-                    { month: "November", workingDays: 21, present: 20, absent: 1, percentage: 95.2 },
-                    { month: "October", workingDays: 22, present: 21, absent: 1, percentage: 95.5 },
-                    { month: "September", workingDays: 20, present: 18, absent: 2, percentage: 90.0 },
-                    { month: "August", workingDays: 21, present: 20, absent: 1, percentage: 95.2 },
-                    { month: "July", workingDays: 22, present: 20, absent: 2, percentage: 90.9 },
-                    { month: "June", workingDays: 15, present: 14, absent: 1, percentage: 93.3 },
-                    { month: "May", workingDays: 21, present: 20, absent: 1, percentage: 95.2 },
-                    { month: "April", workingDays: 20, present: 19, absent: 1, percentage: 95.0 }
-                ],
-                summary: {
-                    totalSubjects: 7,
-                    completedAssignments: 24,
-                    pendingAssignments: 3,
-                    attendancePercentage: "94.2%"
-                }
-            };
+                
+                // Return mock data structure
+                return {
+                    studentInfo: {
+                        name: "Demo Student",
+                        class: "Class X-A",
+                        admissionNo: localStorage.getItem('kv_admission_number') || "12345",
+                        rollNo: "01",
+                        dob: "01-01-2010",
+                        contact: "9876543210",
+                        photoUrl: "/api/placeholder/120/120"
+                    },
+                    summary: {
+                        totalSubjects: 5,
+                        completedAssignments: 8,
+                        pendingAssignments: 2,
+                        attendancePercentage: "95.0%"
+                    },
+                    subjectProgress: [
+                        { subject: "Mathematics", progress: 85, grade: "A" },
+                        { subject: "Science", progress: 78, grade: "B" },
+                        { subject: "English", progress: 92, grade: "A" },
+                        { subject: "Hindi", progress: 88, grade: "A" },
+                        { subject: "Social Science", progress: 75, grade: "B" }
+                    ],
+                    recentTests: [],
+                    subjectActivities: [],
+                    assignments: [],
+                    tests: [],
+                    corrections: [],
+                    attendance: []
+                };
+            }
         }
 
         // Populate Student Information
@@ -1504,6 +1471,7 @@
         // Initialize all data
         async function initializeData() {
             try {
+                console.log('Initializing data');
                 const data = await fetchData();
                 
                 // Populate all sections with data
@@ -1527,30 +1495,6 @@
                 });
             }
         }
-
-        // In a real implementation, you'd have code to fetch from Google Sheets API
-        // For production, you'd need server-side code to securely handle API keys
-        // This would be a function that calls your backend, which then calls Google Sheets API
-        
-        /*
-        async function fetchFromGoogleSheets() {
-            try {
-                // This would be a call to your backend endpoint
-                const response = await fetch('/api/student-data');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch data');
-                }
-                const data = await response.json();
-                return data;
-            } catch (error) {
-                console.error('Error fetching from Google Sheets:', error);
-                throw error;
-            }
-        }
-        */
-
-        // Initialize the app when page loads
-        window.addEventListener('DOMContentLoaded', initializeData);
     </script>
 </body>
 </html>
