@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Portfolio | PM SHRI Kendriya Vidyalya Raebareli</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1e40af;
+            --secondary: #3b82f6;
+            --accent: #bfdbfe;
+            --light: #f1f5f9;
+            --dark: #1e293b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: var(--dark);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+        }
+
+        .school-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .school-logo {
+            width: 60px;
+            height: 60px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 24px;
+        }
+
+        .school-name {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .school-name h1 {
+            font-size: 18px;
+            color: var(--primary);
+            line-height: 1.2;
+        }
+
+        .school-name p {
+            font-size: 14px;
+            color: var(--dark);
+            opacity: 0.8;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .print-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .print-btn:hover {
+            background-color: var(--secondary);
+        }
+
+        /* Student Info Section */
+        .student-info-section {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin: 20px 0;
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .student-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 10px;
+            background-color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 40px;
+            overflow: hidden;
+        }
+
+        .student-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .student-details {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .student-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .student-class {
+            font-size: 16px;
+            color: var(--secondary);
+            margin-bottom: 15px;
+        }
+
+        .student-basic-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: var(--dark);
+            opacity: 0.7;
+        }
+
+        .info-value {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 5px;
+            margin: 20px 0;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            padding-bottom: 5px;
+        }
+
+        .nav-tabs::-webkit-scrollbar {
+            height: 5px;
+        }
+
+        .nav-tabs::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .nav-tabs::-webkit-scrollbar-thumb {
+            background: #ddd;
+            border-radius: 5px;
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            background-color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            white-space: nowrap;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .nav-tab:hover:not(.active) {
+            background-color: var(--light);
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .section-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-dropdown {
+            padding: 6px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        thead {
+            background-color: var(--light);
+        }
+
+        th {
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        tr:hover {
+            background-color: rgba(241, 245, 249, 0.5);
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 30px;
+            font-size: 12px;
+            display: inline-block;
+        }
+
+        .status-complete {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-pending {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .status-overdue {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .grade-badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .grade-a {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .grade-b {
+            background-color: rgba(14, 165, 233, 0.1);
+            color: #0ea5e9;
+        }
+
+        .grade-c {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .grade-d {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        /* Progress cards */
+        .progress-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .progress-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            padding: 15px;
+        }
+
+        .progress-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e5e7eb;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .progress-value {
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+
+        .progress-percentage {
+            font-weight: 600;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Dashboard Summary */
+        .dashboard-summary {
+            margin-bottom: 30px;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+        }
+
+        .summary-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .summary-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .icon-blue {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--secondary);
+        }
+
+        .icon-green {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .icon-yellow {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .icon-red {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .summary-info h3 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .summary-info p {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 30px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .school-name h1 {
+                font-size: 16px;
+            }
+
+            .school-name p {
+                font-size: 12px;
+            }
+
+            .school-logo {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+
+            .student-name {
+                font-size: 20px;
+            }
+
+            .student-class {
+                font-size: 14px;
+            }
+
+            .section-title {
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .school-name p {
+                display: none;
+            }
+
+            .header-container {
+                padding: 10px 15px;
+            }
+
+            .student-photo {
+                width: 100px;
+                height: 100px;
+                margin: 0 auto;
+            }
+
+            .student-details {
+                text-align: center;
+            }
+
+            .student-basic-info {
+                grid-template-columns: 1fr;
+                text-align: left;
+            }
+        }
+
+        /* Login Styles */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(241, 245, 249, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            width: 90%;
+            max-width: 400px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 32px;
+            margin: 0 auto 20px;
+        }
+
+        .login-title {
+            font-size: 24px;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .login-subtitle {
+            font-size: 16px;
+            color: #6b7280;
+            margin-bottom: 25px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .login-input {
+            padding: 12px 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .login-input.error {
+            border-color: var(--danger);
+        }
+
+        .login-error {
+            color: var(--danger);
+            font-size: 14px;
+            margin-top: -5px;
+            text-align: left;
+            display: none;
+        }
+
+        .login-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background-color: var(--secondary);
+        }
+
+        .login-footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .main-content {
+            display: none;
+        }
+
+        .main-content.authenticated {
+            display: block;
+        }
+
+        /* Print Styles */
+        @media print {
+            header button, 
+            .nav-tabs, 
+            .section-actions,
+            .no-print {
+                display: none !important;
+            }
+
+            .content-section {
+                display: block !important;
+                page-break-after: always;
+            }
+
+            body {
+                background-color: white;
+            }
+
+            .container {
+                max-width: 100%;
+                padding: 0 !important;
+            }
+
+            table {
+                page-break-inside: auto;
+            }
+
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+
+            thead {
+                display: table-header-group;
+            }
+
+            tfoot {
+                display: table-footer-group;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Overlay -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-card">
+            <div class="login-logo">KV</div>
+            <h2 class="login-title">Student Portfolio</h2>
+            <p class="login-subtitle">PM SHRI Kendriya Vidyalya, Raebareli</p>
+            
+            <form class="login-form" id="loginForm">
+                <input type="text" class="login-input" id="admissionInput" placeholder="Enter 5-digit Admission Number" maxlength="5">
+                <div class="login-error" id="admissionError">Please enter a valid 5-digit admission number</div>
+                <button type="submit" class="login-btn">Access Portfolio</button>
+            </form>
+            
+            <div class="login-footer">
+                For assistance, please contact the school administration
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <header>
+            <div class="header-container container">
+                <div class="school-info">
+                    <div class="school-logo">KV</div>
+                    <div class="school-name">
+                        <h1>PM SHRI Kendriya Vidyalya</h1>
+                        <p>Raebareli</p>
+                    </div>
+                </div>
+                <div class="user-actions">
+                    <button class="print-btn" id="printBtn">
+                        <i class="fas fa-print"></i> Print Report
+                    </button>
+                    <button class="print-btn" id="logoutBtn" style="background-color: #6b7280;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="container">
+        <!-- Student Info -->
+        <section class="student-info-section">
+            <div class="student-photo">
+                <img src="/api/placeholder/120/120" alt="Student Photo" id="studentPhoto">
+            </div>
+            <div class="student-details">
+                <h2 class="student-name" id="studentName">Loading...</h2>
+                <div class="student-class" id="studentClass">Loading...</div>
+                <div class="student-basic-info">
+                    <div class="info-item">
+                        <div class="info-label">Admission No.</div>
+                        <div class="info-value" id="admissionNo">Loading...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Roll No.</div>
+                        <div class="info-value" id="rollNo">Loading...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Date of Birth</div>
+                        <div class="info-value" id="dob">Loading...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Contact</div>
+                        <div class="info-value" id="contact">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation -->
+        <div class="nav-tabs">
+            <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
+            <div class="nav-tab" data-tab="subjects">Subject Activities</div>
+            <div class="nav-tab" data-tab="assignments">Assignments</div>
+            <div class="nav-tab" data-tab="tests">Tests & Assessments</div>
+            <div class="nav-tab" data-tab="corrections">Copy Corrections</div>
+            <div class="nav-tab" data-tab="attendance">Attendance</div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <section class="content-section active" id="dashboard">
+            <div class="dashboard-summary">
+                <div class="section-header">
+                    <h2 class="section-title">Academic Overview</h2>
+                </div>
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <div class="summary-icon icon-blue">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="summary-info">
+                            <h3 id="totalSubjects">7</h3>
+                            <p>Subjects</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon icon-green">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="summary-info">
+                            <h3 id="completedAssignments">24</h3>
+                            <p>Completed Assignments</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon icon-yellow">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="summary-info">
+                            <h3 id="pendingAssignments">3</h3>
+                            <p>Pending Assignments</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon icon-red">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="summary-info">
+                            <h3 id="attendancePercentage">94.2%</h3>
+                            <p>Attendance</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Cards -->
+            <div class="section-header">
+                <h2 class="section-title">Subject Performance</h2>
+            </div>
+            <div class="progress-cards" id="subjectProgressCards">
+                <!-- Will be populated by JavaScript -->
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+
+            <!-- Recent Tests -->
+            <div class="section-header">
+                <h2 class="section-title">Recent Test Results</h2>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Test Name</th>
+                            <th>Date</th>
+                            <th>Marks</th>
+                            <th>Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentTestsTable">
+                        <!-- Will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Subjects Section -->
+        <section class="content-section" id="subjects">
+            <div class="section-header">
+                <h2 class="section-title">Subject Activities</h2>
+                <div class="section-actions">
+                    <select class="filter-dropdown" id="subjectFilter">
+                        <option value="all">All Subjects</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Science">Science</option>
+                        <option value="English">English</option>
+                        <option value="Hindi">Hindi</option>
+                        <option value="Social Science">Social Science</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Sanskrit">Sanskrit</option>
+                    </select>
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Activity</th>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subjectActivitiesTable">
+                        <!-- Will be populated by JavaScript -->
+                        <tr>
+                            <td colspan="5" class="loading">
+                                <div class="spinner"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Assignments Section -->
+        <section class="content-section" id="assignments">
+            <div class="section-header">
+                <h2 class="section-title">Assignments</h2>
+                <div class="section-actions">
+                    <select class="filter-dropdown" id="assignmentStatusFilter">
+                        <option value="all">All Status</option>
+                        <option value="complete">Complete</option>
+                        <option value="pending">Pending</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Assignment</th>
+                            <th>Assigned Date</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assignmentsTable">
+                        <!-- Will be populated by JavaScript -->
+                        <tr>
+                            <td colspan="6" class="loading">
+                                <div class="spinner"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Tests Section -->
+        <section class="content-section" id="tests">
+            <div class="section-header">
+                <h2 class="section-title">Tests & Assessments</h2>
+                <div class="section-actions">
+                    <select class="filter-dropdown" id="testSubjectFilter">
+                        <option value="all">All Subjects</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Science">Science</option>
+                        <option value="English">English</option>
+                        <option value="Hindi">Hindi</option>
+                        <option value="Social Science">Social Science</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Sanskrit">Sanskrit</option>
+                    </select>
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Test Name</th>
+                            <th>Date</th>
+                            <th>Max Marks</th>
+                            <th>Marks Obtained</th>
+                            <th>Percentage</th>
+                            <th>Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody id="testsTable">
+                        <!-- Will be populated by JavaScript -->
+                        <tr>
+                            <td colspan="7" class="loading">
+                                <div class="spinner"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Copy Corrections Section -->
+        <section class="content-section" id="corrections">
+            <div class="section-header">
+                <h2 class="section-title">Copy Corrections</h2>
+                <div class="section-actions">
+                    <select class="filter-dropdown" id="correctionSubjectFilter">
+                        <option value="all">All Subjects</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Science">Science</option>
+                        <option value="English">English</option>
+                        <option value="Hindi">Hindi</option>
+                        <option value="Social Science">Social Science</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Sanskrit">Sanskrit</option>
+                    </select>
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Copy Type</th>
+                            <th>Correction Date</th>
+                            <th>Areas of Improvement</th>
+                            <th>Teacher's Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody id="correctionsTable">
+                        <!-- Will be populated by JavaScript -->
+                        <tr>
+                            <td colspan="5" class="loading">
+                                <div class="spinner"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Attendance Section -->
+        <section class="content-section" id="attendance">
+            <div class="section-header">
+                <h2 class="section-title">Attendance Record</h2>
+                <div class="section-actions">
+                    <select class="filter-dropdown" id="attendanceMonthFilter">
+                        <option value="all">All Months</option>
+                        <option value="April">April</option>
+                        <option value="May">May</option>
+                        <option value="June">June</option>
+                        <option value="July">July</option>
+                        <option value="August">August</option>
+                        <option value="September">September</option>
+                        <option value="October">October</option>
+                        <option value="November">November</option>
+                        <option value="December">December</option>
+                        <option value="January">January</option>
+                        <option value="February">February</option>
+                        <option value="March">March</option>
+                    </select>
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Working Days</th>
+                            <th>Present</th>
+                            <th>Absent</th>
+                            <th>Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceTable">
+                        <!-- Will be populated by JavaScript -->
+                        <tr>
+                            <td colspan="5" class="loading">
+                                <div class="spinner"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 PM SHRI Kendriya Vidyalya, Raebareli. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Tab Navigation
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                
+                // Hide all content sections
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                // Show content section corresponding to clicked tab
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Login Validation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is already logged in
+            const isAuthenticated = localStorage.getItem('kv_authenticated');
+            if (isAuthenticated) {
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('mainContent').classList.add('authenticated');
+            }
+            
+            // Handle login form submission
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const admissionInput = document.getElementById('admissionInput');
+                const admissionError = document.getElementById('admissionError');
+                const admissionNumber = admissionInput.value.trim();
+                
+                // Validate: must be exactly 5 digits
+                const isValid = /^\d{5}$/.test(admissionNumber);
+                
+                if (isValid) {
+                    // Store authentication state
+                    localStorage.setItem('kv_authenticated', 'true');
+                    localStorage.setItem('kv_admission_number', admissionNumber);
+                    
+                    // Hide login, show content
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    document.getElementById('mainContent').classList.add('authenticated');
+                    
+                    // Load student data (in production, you would load based on the admission number)
+                    // Here we're using our demo data for all valid admission numbers
+                    initializeData();
+                } else {
+                    // Show error
+                    admissionInput.classList.add('error');
+                    admissionError.style.display = 'block';
+                }
+            });
+            
+            // Clear error on input focus
+            document.getElementById('admissionInput').addEventListener('focus', function() {
+                this.classList.remove('error');
+                document.getElementById('admissionError').style.display = 'none';
+            });
+        });
+        
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('kv_authenticated');
+            localStorage.removeItem('kv_admission_number');
+            location.reload();
+        });
+        
+        // Print functionality
+        document.getElementById('printBtn').addEventListener('click', () => {
+            window.print();
+        });
+
+        // Google Sheets API Integration
+        // Note: In a real implementation, you would fetch these values from your backend (render.com)
+        // For demonstration, we'll use placeholder data and simulate API behavior
+        
+        async function fetchData() {
+            try {
+                // Get the admission number from localStorage
+                const admissionNumber = localStorage.getItem('kv_admission_number');
+                console.log(`Fetching data for admission number: ${admissionNumber}`);
+                
+                // In production, fetch credentials securely from backend
+                const credentialsResponse = await fetch('/api/get-sheets-credentials');
+                if (!credentialsResponse.ok) {
+                    throw new Error('Failed to get credentials');
+                }
+                
+                const { SHEET_ID, API_KEY } = await credentialsResponse.json();
+                
+                // Fetch all student data from different sheets
+                const dataResponse = await fetch(`/api/student-data?admission=${admissionNumber}`);
+                if (!dataResponse.ok) {
+                    throw new Error('Failed to fetch student data');
+                }
+                
+                return await dataResponse.json();
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                
+                // For development/fallback, return mock data
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Mock data - in production this would come from Google Sheets API
+            return {
+                studentInfo: {
+                    name: "Amit Kumar Singh",
+                    class: "Class X-A",
+                    admissionNo: "KV2023/456",
+                    rollNo: "24",
+                    dob: "12-08-2009",
+                    contact: "+91 9876543210",
+                    photoUrl: "/api/placeholder/120/120" // In production, this would be a real URL
+                },
+                subjectProgress: [
+                    { subject: "Mathematics", progress: 85, grade: "A" },
+                    { subject: "Science", progress: 78, grade: "B" },
+                    { subject: "English", progress: 92, grade: "A" },
+                    { subject: "Hindi", progress: 88, grade: "A" },
+                    { subject: "Social Science", progress: 75, grade: "B" },
+                    { subject: "Computer Science", progress: 95, grade: "A" },
+                    { subject: "Sanskrit", progress: 82, grade: "B" }
+                ],
+                recentTests: [
+                    { subject: "Mathematics", name: "Unit Test 3", date: "15-03-2024", marks: "45/50", percentage: 90, grade: "A" },
+                    { subject: "Science", name: "Practical Assessment", date: "10-03-2024", marks: "38/50", percentage: 76, grade: "B" },
+                    { subject: "English", name: "Grammar Quiz", date: "08-03-2024", marks: "23/25", percentage: 92, grade: "A" },
+                    { subject: "Hindi", name: "Half Yearly", date: "20-02-2024", marks: "85/100", percentage: 85, grade: "A" },
+                    { subject: "Social Science", name: "Map Skills Test", date: "18-02-2024", marks: "18/25", percentage: 72, grade: "B" }
+                ],
+                subjectActivities: [
+                    { subject: "Mathematics", activity: "Geometry Workshop", date: "18-03-2024", description: "Practical session on constructions", status: "complete" },
+                    { subject: "Science", activity: "Lab Experiment", date: "12-03-2024", description: "Chemical reactions demonstration", status: "complete" },
+                    { subject: "English", activity: "Debate Competition", date: "25-03-2024", description: "Topic: Technology in Education", status: "pending" },
+                    { subject: "Computer Science", activity: "Coding Project", date: "20-03-2024", description: "Simple calculator program", status: "complete" },
+                    { subject: "Hindi", activity: "Poetry Recitation", date: "15-03-2024", description: "Recitation of poems by famous poets", status: "complete" },
+                    { subject: "Social Science", activity: "Map Activity", date: "10-03-2024", description: "India's geographical features marking", status: "complete" },
+                    { subject: "Mathematics", activity: "Math Olympiad", date: "30-03-2024", description: "School level competition", status: "pending" },
+                    { subject: "Sanskrit", activity: "Group Reading", date: "05-03-2024", description: "Chapter 7 reading and translation", status: "complete" }
+                ],
+                assignments: [
+                    { subject: "Mathematics", name: "Trigonometry Worksheet", assignedDate: "15-03-2024", dueDate: "20-03-2024", status: "complete", remarks: "Well done!" },
+                    { subject: "Science", name: "Physics Numerical Set", assignedDate: "12-03-2024", dueDate: "18-03-2024", status: "complete", remarks: "Good work" },
+                    { subject: "English", name: "Essay Writing", assignedDate: "10-03-2024", dueDate: "17-03-2024", status: "complete", remarks: "Excellent vocabulary" },
+                    { subject: "Hindi", name: "Grammar Exercise", assignedDate: "08-03-2024", dueDate: "15-03-2024", status: "complete", remarks: "Needs improvement" },
+                    { subject: "Social Science", name: "History Timeline", assignedDate: "05-03-2024", dueDate: "12-03-2024", status: "complete", remarks: "Very detailed" },
+                    { subject: "Computer Science", name: "Algorithm Design", assignedDate: "18-03-2024", dueDate: "25-03-2024", status: "pending", remarks: "" },
+                    { subject: "Sanskrit", name: "Translation Exercise", assignedDate: "16-03-2024", dueDate: "23-03-2024", status: "pending", remarks: "" },
+                    { subject: "Mathematics", name: "Statistics Project", assignedDate: "20-03-2024", dueDate: "27-03-2024", status: "pending", remarks: "" },
+                    { subject: "Science", name: "Biology Diagram", assignedDate: "01-03-2024", dueDate: "08-03-2024", status: "overdue", remarks: "Not submitted" }
+                ],
+                tests: [
+                    { subject: "Mathematics", name: "Unit Test 3", date: "15-03-2024", maxMarks: 50, marksObtained: 45, percentage: 90, grade: "A" },
+                    { subject: "Mathematics", name: "Unit Test 2", date: "15-02-2024", maxMarks: 50, marksObtained: 42, percentage: 84, grade: "B" },
+                    { subject: "Mathematics", name: "Unit Test 1", date: "15-01-2024", maxMarks: 50, marksObtained: 47, percentage: 94, grade: "A" },
+                    { subject: "Science", name: "Practical Assessment", date: "10-03-2024", maxMarks: 50, marksObtained: 38, percentage: 76, grade: "B" },
+                    { subject: "Science", name: "Theory Test", date: "05-03-2024", maxMarks: 80, marksObtained: 68, percentage: 85, grade: "A" },
+                    { subject: "English", name: "Grammar Quiz", date: "08-03-2024", maxMarks: 25, marksObtained: 23, percentage: 92, grade: "A" },
+                    { subject: "English", name: "Reading Comprehension", date: "20-02-2024", maxMarks: 30, marksObtained: 25, percentage: 83, grade: "B" },
+                    { subject: "Hindi", name: "Half Yearly", date: "20-02-2024", maxMarks: 100, marksObtained: 85, percentage: 85, grade: "A" },
+                    { subject: "Social Science", name: "Map Skills Test", date: "18-02-2024", maxMarks: 25, marksObtained: 18, percentage: 72, grade: "B" },
+                    { subject: "Computer Science", name: "Practical Exam", date: "25-02-2024", maxMarks: 50, marksObtained: 47, percentage: 94, grade: "A" },
+                    { subject: "Sanskrit", name: "Quarterly Test", date: "12-01-2024", maxMarks: 50, marksObtained: 41, percentage: 82, grade: "B" }
+                ],
+                corrections: [
+                    { subject: "Mathematics", copyType: "Classwork Notebook", date: "16-03-2024", improvements: "Improve presentation of solutions", remarks: "Good calculations but work on steps" },
+                    { subject: "Science", copyType: "Lab Record", date: "14-03-2024", improvements: "Better diagrams needed", remarks: "Neat work but incomplete in some parts" },
+                    { subject: "English", copyType: "Grammar Notebook", date: "12-03-2024", improvements: "More practice on tenses", remarks: "Good overall work" },
+                    { subject: "Hindi", copyType: "Literature Notebook", date: "10-03-2024", improvements: "Pay attention to spelling", remarks: "Content is good" },
+                    { subject: "Social Science", copyType: "Project File", date: "08-03-2024", improvements: "Add more visual elements", remarks: "Well researched topic" },
+                    { subject: "Computer Science", copyType: "Practical File", date: "05-03-2024", improvements: "Better documentation of code", remarks: "Programs are working correctly" },
+                    { subject: "Sanskrit", copyType: "Exercise Book", date: "03-03-2024", improvements: "More attention to grammar rules", remarks: "Translation is improving" }
+                ],
+                attendance: [
+                    { month: "March", workingDays: 23, present: 22, absent: 1, percentage: 95.7 },
+                    { month: "February", workingDays: 20, present: 18, absent: 2, percentage: 90.0 },
+                    { month: "January", workingDays: 22, present: 21, absent: 1, percentage: 95.5 },
+                    { month: "December", workingDays: 18, present: 17, absent: 1, percentage: 94.4 },
+                    { month: "November", workingDays: 21, present: 20, absent: 1, percentage: 95.2 },
+                    { month: "October", workingDays: 22, present: 21, absent: 1, percentage: 95.5 },
+                    { month: "September", workingDays: 20, present: 18, absent: 2, percentage: 90.0 },
+                    { month: "August", workingDays: 21, present: 20, absent: 1, percentage: 95.2 },
+                    { month: "July", workingDays: 22, present: 20, absent: 2, percentage: 90.9 },
+                    { month: "June", workingDays: 15, present: 14, absent: 1, percentage: 93.3 },
+                    { month: "May", workingDays: 21, present: 20, absent: 1, percentage: 95.2 },
+                    { month: "April", workingDays: 20, present: 19, absent: 1, percentage: 95.0 }
+                ],
+                summary: {
+                    totalSubjects: 7,
+                    completedAssignments: 24,
+                    pendingAssignments: 3,
+                    attendancePercentage: "94.2%"
+                }
+            };
+        }
+
+        // Populate Student Information
+        function populateStudentInfo(data) {
+            document.getElementById('studentName').textContent = data.name;
+            document.getElementById('studentClass').textContent = data.class;
+            document.getElementById('admissionNo').textContent = data.admissionNo;
+            document.getElementById('rollNo').textContent = data.rollNo;
+            document.getElementById('dob').textContent = data.dob;
+            document.getElementById('contact').textContent = data.contact;
+            document.getElementById('studentPhoto').src = data.photoUrl;
+        }
+
+        // Populate Dashboard Summary
+        function populateSummary(data) {
+            document.getElementById('totalSubjects').textContent = data.totalSubjects;
+            document.getElementById('completedAssignments').textContent = data.completedAssignments;
+            document.getElementById('pendingAssignments').textContent = data.pendingAssignments;
+            document.getElementById('attendancePercentage').textContent = data.attendancePercentage;
+        }
+
+        // Populate Subject Progress Cards
+        function populateSubjectProgress(data) {
+            const container = document.getElementById('subjectProgressCards');
+            container.innerHTML = '';
+
+            data.forEach(subject => {
+                const colorClass = subject.progress >= 90 ? '#10b981' : 
+                                subject.progress >= 80 ? '#3b82f6' : 
+                                subject.progress >= 70 ? '#f59e0b' : '#ef4444';
+                
+                const card = document.createElement('div');
+                card.className = 'progress-card';
+                card.innerHTML = `
+                    <div class="progress-title">${subject.subject}</div>
+                    <div class="progress-bar">
+                        <div class="progress-value" style="width: ${subject.progress}%; background-color: ${colorClass};"></div>
+                    </div>
+                    <div class="progress-stats">
+                        <div class="progress-label">Progress</div>
+                        <div class="progress-percentage">${subject.progress}%</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Populate Recent Tests
+        function populateRecentTests(data) {
+            const tbody = document.getElementById('recentTestsTable');
+            tbody.innerHTML = '';
+
+            data.forEach(test => {
+                const gradeClass = test.grade === 'A' ? 'grade-a' : 
+                                test.grade === 'B' ? 'grade-b' : 
+                                test.grade === 'C' ? 'grade-c' : 'grade-d';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${test.subject}</td>
+                    <td>${test.name}</td>
+                    <td>${test.date}</td>
+                    <td>${test.marks}</td>
+                    <td><span class="grade-badge ${gradeClass}">${test.grade}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Populate Subject Activities
+        function populateSubjectActivities(data) {
+            const tbody = document.getElementById('subjectActivitiesTable');
+            tbody.innerHTML = '';
+
+            data.forEach(activity => {
+                const statusClass = activity.status === 'complete' ? 'status-complete' : 
+                                 activity.status === 'pending' ? 'status-pending' : 'status-overdue';
+                
+                const statusText = activity.status.charAt(0).toUpperCase() + activity.status.slice(1);
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${activity.subject}</td>
+                    <td>${activity.activity}</td>
+                    <td>${activity.date}</td>
+                    <td>${activity.description}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Populate Assignments
+        function populateAssignments(data) {
+            const tbody = document.getElementById('assignmentsTable');
+            tbody.innerHTML = '';
+
+            data.forEach(assignment => {
+                const statusClass = assignment.status === 'complete' ? 'status-complete' : 
+                                 assignment.status === 'pending' ? 'status-pending' : 'status-overdue';
+                
+                const statusText = assignment.status.charAt(0).toUpperCase() + assignment.status.slice(1);
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${assignment.subject}</td>
+                    <td>${assignment.name}</td>
+                    <td>${assignment.assignedDate}</td>
+                    <td>${assignment.dueDate}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>${assignment.remarks}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Populate Tests
+        function populateTests(data) {
+            const tbody = document.getElementById('testsTable');
+            tbody.innerHTML = '';
+
+            data.forEach(test => {
+                const gradeClass = test.grade === 'A' ? 'grade-a' : 
+                                test.grade === 'B' ? 'grade-b' : 
+                                test.grade === 'C' ? 'grade-c' : 'grade-d';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${test.subject}</td>
+                    <td>${test.name}</td>
+                    <td>${test.date}</td>
+                    <td>${test.maxMarks}</td>
+                    <td>${test.marksObtained}</td>
+                    <td>${test.percentage}%</td>
+                    <td><span class="grade-badge ${gradeClass}">${test.grade}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Populate Copy Corrections
+        function populateCorrections(data) {
+            const tbody = document.getElementById('correctionsTable');
+            tbody.innerHTML = '';
+
+            data.forEach(correction => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${correction.subject}</td>
+                    <td>${correction.copyType}</td>
+                    <td>${correction.date}</td>
+                    <td>${correction.improvements}</td>
+                    <td>${correction.remarks}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Populate Attendance
+        function populateAttendance(data) {
+            const tbody = document.getElementById('attendanceTable');
+            tbody.innerHTML = '';
+
+            data.forEach(month => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${month.month}</td>
+                    <td>${month.workingDays}</td>
+                    <td>${month.present}</td>
+                    <td>${month.absent}</td>
+                    <td>${month.percentage.toFixed(1)}%</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Filter handlers
+        function setupFilters(data) {
+            // Subject filter for activities
+            document.getElementById('subjectFilter').addEventListener('change', e => {
+                const selectedSubject = e.target.value;
+                let filteredData = data.subjectActivities;
+                
+                if (selectedSubject !== 'all') {
+                    filteredData = data.subjectActivities.filter(activity => activity.subject === selectedSubject);
+                }
+                
+                populateSubjectActivities(filteredData);
+            });
+            
+            // Assignment status filter
+            document.getElementById('assignmentStatusFilter').addEventListener('change', e => {
+                const selectedStatus = e.target.value;
+                let filteredData = data.assignments;
+                
+                if (selectedStatus !== 'all') {
+                    filteredData = data.assignments.filter(assignment => assignment.status === selectedStatus);
+                }
+                
+                populateAssignments(filteredData);
+            });
+            
+            // Test subject filter
+            document.getElementById('testSubjectFilter').addEventListener('change', e => {
+                const selectedSubject = e.target.value;
+                let filteredData = data.tests;
+                
+                if (selectedSubject !== 'all') {
+                    filteredData = data.tests.filter(test => test.subject === selectedSubject);
+                }
+                
+                populateTests(filteredData);
+            });
+            
+            // Correction subject filter
+            document.getElementById('correctionSubjectFilter').addEventListener('change', e => {
+                const selectedSubject = e.target.value;
+                let filteredData = data.corrections;
+                
+                if (selectedSubject !== 'all') {
+                    filteredData = data.corrections.filter(correction => correction.subject === selectedSubject);
+                }
+                
+                populateCorrections(filteredData);
+            });
+            
+            // Attendance month filter
+            document.getElementById('attendanceMonthFilter').addEventListener('change', e => {
+                const selectedMonth = e.target.value;
+                let filteredData = data.attendance;
+                
+                if (selectedMonth !== 'all') {
+                    filteredData = data.attendance.filter(record => record.month === selectedMonth);
+                }
+                
+                populateAttendance(filteredData);
+            });
+        }
+
+        // Initialize all data
+        async function initializeData() {
+            try {
+                const data = await fetchData();
+                
+                // Populate all sections with data
+                populateStudentInfo(data.studentInfo);
+                populateSummary(data.summary);
+                populateSubjectProgress(data.subjectProgress);
+                populateRecentTests(data.recentTests);
+                populateSubjectActivities(data.subjectActivities);
+                populateAssignments(data.assignments);
+                populateTests(data.tests);
+                populateCorrections(data.corrections);
+                populateAttendance(data.attendance);
+                
+                // Setup filters
+                setupFilters(data);
+            } catch (error) {
+                console.error('Error loading data:', error);
+                // Display error message to user
+                document.querySelectorAll('.loading').forEach(loader => {
+                    loader.innerHTML = '<p>Error loading data. Please try again later.</p>';
+                });
+            }
+        }
+
+        // In a real implementation, you'd have code to fetch from Google Sheets API
+        // For production, you'd need server-side code to securely handle API keys
+        // This would be a function that calls your backend, which then calls Google Sheets API
+        
+        /*
+        async function fetchFromGoogleSheets() {
+            try {
+                // This would be a call to your backend endpoint
+                const response = await fetch('/api/student-data');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching from Google Sheets:', error);
+                throw error;
+            }
+        }
+        */
+
+        // Initialize the app when page loads
+        window.addEventListener('DOMContentLoaded', initializeData);
+    </script>
+</body>
+</html>
