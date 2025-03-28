@@ -1089,15 +1089,18 @@
 
         // Login Validation
         document.addEventListener('DOMContentLoaded', function() {
+            const API_BASE_URL = 'https://student-portfolio-api.onrender.com';
+            
             // Check if user is already logged in
             const isAuthenticated = localStorage.getItem('kv_authenticated');
             if (isAuthenticated) {
                 document.getElementById('loginOverlay').style.display = 'none';
                 document.getElementById('mainContent').classList.add('authenticated');
+                initializeData(); // Load data for authenticated user
             }
             
             // Handle login form submission
-            document.getElementById('loginForm').addEventListener('submit', function(e) {
+            document.getElementById('loginForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
                 const admissionInput = document.getElementById('admissionInput');
@@ -1108,17 +1111,36 @@
                 const isValid = /^\d{5}$/.test(admissionNumber);
                 
                 if (isValid) {
-                    // Store authentication state
-                    localStorage.setItem('kv_authenticated', 'true');
-                    localStorage.setItem('kv_admission_number', admissionNumber);
-                    
-                    // Hide login, show content
-                    document.getElementById('loginOverlay').style.display = 'none';
-                    document.getElementById('mainContent').classList.add('authenticated');
-                    
-                    // Load student data (in production, you would load based on the admission number)
-                    // Here we're using our demo data for all valid admission numbers
-                    initializeData();
+                    try {
+                        // Send login request to backend
+                        const response = await fetch(`${API_BASE_URL}/api/login`, {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ admissionNumber })
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error('Login failed');
+                        }
+                        
+                        // Store authentication state
+                        localStorage.setItem('kv_authenticated', 'true');
+                        localStorage.setItem('kv_admission_number', admissionNumber);
+                        
+                        // Hide login, show content
+                        document.getElementById('loginOverlay').style.display = 'none';
+                        document.getElementById('mainContent').classList.add('authenticated');
+                        
+                        // Load student data
+                        initializeData();
+                    } catch (error) {
+                        console.error('Login error:', error);
+                        admissionError.textContent = 'Server error. Please try again.';
+                        admissionError.style.display = 'block';
+                    }
                 } else {
                     // Show error
                     admissionInput.classList.add('error');
@@ -1134,7 +1156,20 @@
         });
         
         // Logout functionality
-        document.getElementById('logoutBtn').addEventListener('click', () => {
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            const API_BASE_URL = 'https://student-portfolio-api.onrender.com';
+            
+            try {
+                // Send logout request to backend
+                await fetch(`${API_BASE_URL}/api/logout`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+            
+            // Clear local storage and reload regardless of server response
             localStorage.removeItem('kv_authenticated');
             localStorage.removeItem('kv_admission_number');
             location.reload();
@@ -1150,13 +1185,18 @@
         // For demonstration, we'll use placeholder data and simulate API behavior
         
         async function fetchData() {
+            const API_BASE_URL = 'https://student-portfolio-api.onrender.com';
+            
             try {
                 // Get the admission number from localStorage
                 const admissionNumber = localStorage.getItem('kv_admission_number');
                 console.log(`Fetching data for admission number: ${admissionNumber}`);
                 
                 // In production, fetch credentials securely from backend
-                const credentialsResponse = await fetch('/api/get-sheets-credentials');
+                const credentialsResponse = await fetch(`${API_BASE_URL}/api/get-sheets-credentials`, {
+                    credentials: 'include' // Include session cookies
+                });
+                
                 if (!credentialsResponse.ok) {
                     throw new Error('Failed to get credentials');
                 }
@@ -1164,7 +1204,10 @@
                 const { SHEET_ID, API_KEY } = await credentialsResponse.json();
                 
                 // Fetch all student data from different sheets
-                const dataResponse = await fetch(`/api/student-data?admission=${admissionNumber}`);
+                const dataResponse = await fetch(`${API_BASE_URL}/api/student-data?admission=${admissionNumber}`, {
+                    credentials: 'include' // Include session cookies
+                });
+                
                 if (!dataResponse.ok) {
                     throw new Error('Failed to fetch student data');
                 }
