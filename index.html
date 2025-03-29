@@ -658,6 +658,13 @@
             }
         }
 
+        /* Empty state */
+        .empty-state {
+            padding: 20px;
+            text-align: center;
+            color: #6b7280;
+        }
+
         /* Print Styles */
         @media print {
             header button, 
@@ -798,7 +805,7 @@
                                 <i class="fas fa-book"></i>
                             </div>
                             <div class="summary-info">
-                                <h3 id="totalSubjects">7</h3>
+                                <h3 id="totalSubjects">-</h3>
                                 <p>Subjects</p>
                             </div>
                         </div>
@@ -807,7 +814,7 @@
                                 <i class="fas fa-check-circle"></i>
                             </div>
                             <div class="summary-info">
-                                <h3 id="completedAssignments">24</h3>
+                                <h3 id="completedAssignments">-</h3>
                                 <p>Completed Assignments</p>
                             </div>
                         </div>
@@ -816,7 +823,7 @@
                                 <i class="fas fa-clock"></i>
                             </div>
                             <div class="summary-info">
-                                <h3 id="pendingAssignments">3</h3>
+                                <h3 id="pendingAssignments">-</h3>
                                 <p>Pending Assignments</p>
                             </div>
                         </div>
@@ -825,7 +832,7 @@
                                 <i class="fas fa-calendar-check"></i>
                             </div>
                             <div class="summary-info">
-                                <h3 id="attendancePercentage">94.2%</h3>
+                                <h3 id="attendancePercentage">-</h3>
                                 <p>Attendance</p>
                             </div>
                         </div>
@@ -872,13 +879,6 @@
                     <div class="section-actions">
                         <select class="filter-dropdown" id="subjectFilter">
                             <option value="all">All Subjects</option>
-                            <option value="Mathematics">Mathematics</option>
-                            <option value="Science">Science</option>
-                            <option value="English">English</option>
-                            <option value="Hindi">Hindi</option>
-                            <option value="Social Science">Social Science</option>
-                            <option value="Computer Science">Computer Science</option>
-                            <option value="Sanskrit">Sanskrit</option>
                         </select>
                     </div>
                 </div>
@@ -949,13 +949,6 @@
                     <div class="section-actions">
                         <select class="filter-dropdown" id="testSubjectFilter">
                             <option value="all">All Subjects</option>
-                            <option value="Mathematics">Mathematics</option>
-                            <option value="Science">Science</option>
-                            <option value="English">English</option>
-                            <option value="Hindi">Hindi</option>
-                            <option value="Social Science">Social Science</option>
-                            <option value="Computer Science">Computer Science</option>
-                            <option value="Sanskrit">Sanskrit</option>
                         </select>
                     </div>
                 </div>
@@ -991,13 +984,6 @@
                     <div class="section-actions">
                         <select class="filter-dropdown" id="correctionSubjectFilter">
                             <option value="all">All Subjects</option>
-                            <option value="Mathematics">Mathematics</option>
-                            <option value="Science">Science</option>
-                            <option value="English">English</option>
-                            <option value="Hindi">Hindi</option>
-                            <option value="Social Science">Social Science</option>
-                            <option value="Computer Science">Computer Science</option>
-                            <option value="Sanskrit">Sanskrit</option>
                         </select>
                     </div>
                 </div>
@@ -1031,18 +1017,6 @@
                     <div class="section-actions">
                         <select class="filter-dropdown" id="attendanceMonthFilter">
                             <option value="all">All Months</option>
-                            <option value="April">April</option>
-                            <option value="May">May</option>
-                            <option value="June">June</option>
-                            <option value="July">July</option>
-                            <option value="August">August</option>
-                            <option value="September">September</option>
-                            <option value="October">October</option>
-                            <option value="November">November</option>
-                            <option value="December">December</option>
-                            <option value="January">January</option>
-                            <option value="February">February</option>
-                            <option value="March">March</option>
                         </select>
                     </div>
                 </div>
@@ -1180,7 +1154,7 @@
             });
         });
 
-        // IMPROVED: Fetch data function with better error handling
+        // IMPROVED: Fetch data function with better error handling for horizontal data structure
         async function fetchData() {
             const API_BASE_URL = 'https://student-portfolio-api.onrender.com';
             
@@ -1189,16 +1163,22 @@
                 const admissionNumber = localStorage.getItem('kv_admission_number');
                 console.log(`Fetching data for admission number: ${admissionNumber}`);
                 
-                // First check if API is available
+                // Check API status first
                 try {
+                    console.log(`Checking API status at: ${API_BASE_URL}/api/status`);
                     const statusResponse = await fetch(`${API_BASE_URL}/api/status`);
                     const statusData = await statusResponse.json();
                     console.log('API Status:', statusData);
+                    
+                    if (!statusData.sheetsConfigured) {
+                        console.warn('Google Sheets not properly configured on backend');
+                    }
                 } catch (statusError) {
                     console.error('API Status Check Failed:', statusError);
+                    throw new Error('Cannot connect to the backend server. Please try again later.');
                 }
                 
-                // Direct API call to fetch student data
+                // Fetch student data
                 console.log(`Making request to: ${API_BASE_URL}/api/student-data?admission=${admissionNumber}`);
                 const dataResponse = await fetch(`${API_BASE_URL}/api/student-data?admission=${admissionNumber}`);
                 
@@ -1210,6 +1190,10 @@
                 
                 const data = await dataResponse.json();
                 console.log('Successfully received data:', data);
+                
+                // Validate data structure
+                validateDataStructure(data);
+                
                 return data;
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -1217,10 +1201,7 @@
                 // Show error message to user
                 alert(`Error loading data: ${error.message}. Please try again later.`);
                 
-                // For development/fallback, return mock data
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                // Return mock data structure
+                // Return a basic default data structure
                 return {
                     studentInfo: {
                         name: "Demo Student",
@@ -1229,21 +1210,15 @@
                         rollNo: "01",
                         dob: "01-01-2010",
                         contact: "9876543210",
-                        photoUrl: "/api/placeholder/120/120"
+                        photoUrl: "https://imgur.com/GxoHln6.png" // Use school logo as fallback
                     },
                     summary: {
-                        totalSubjects: 5,
-                        completedAssignments: 8,
-                        pendingAssignments: 2,
-                        attendancePercentage: "95.0%"
+                        totalSubjects: 0,
+                        completedAssignments: 0,
+                        pendingAssignments: 0,
+                        attendancePercentage: "0.0%"
                     },
-                    subjectProgress: [
-                        { subject: "Mathematics", progress: 85, grade: "A" },
-                        { subject: "Science", progress: 78, grade: "B" },
-                        { subject: "English", progress: 92, grade: "A" },
-                        { subject: "Hindi", progress: 88, grade: "A" },
-                        { subject: "Social Science", progress: 75, grade: "B" }
-                    ],
+                    subjectProgress: [],
                     recentTests: [],
                     subjectActivities: [],
                     assignments: [],
@@ -1253,24 +1228,114 @@
                 };
             }
         }
+        
+        // Validate data structure to ensure it matches frontend expectations
+        function validateDataStructure(data) {
+            if (!data) {
+                throw new Error('No data received from API');
+            }
+            
+            // Basic validation of required objects and arrays
+            if (!data.studentInfo) {
+                console.warn('Missing studentInfo in data');
+                data.studentInfo = {
+                    name: "Unknown Student",
+                    class: "Unknown Class",
+                    admissionNo: localStorage.getItem('kv_admission_number') || "00000",
+                    rollNo: "00",
+                    dob: "-",
+                    contact: "-",
+                    photoUrl: "https://imgur.com/GxoHln6.png" 
+                };
+            }
+            
+            if (!Array.isArray(data.subjectProgress)) {
+                console.warn('subjectProgress is not an array');
+                data.subjectProgress = [];
+            }
+            
+            if (!Array.isArray(data.subjectActivities)) {
+                console.warn('subjectActivities is not an array');
+                data.subjectActivities = [];
+            }
+            
+            if (!Array.isArray(data.assignments)) {
+                console.warn('assignments is not an array');
+                data.assignments = [];
+            }
+            
+            if (!Array.isArray(data.tests)) {
+                console.warn('tests is not an array');
+                data.tests = [];
+            }
+            
+            if (!Array.isArray(data.recentTests)) {
+                console.warn('recentTests is not an array');
+                data.recentTests = [];
+            }
+            
+            if (!Array.isArray(data.corrections)) {
+                console.warn('corrections is not an array');
+                data.corrections = [];
+            }
+            
+            if (!Array.isArray(data.attendance)) {
+                console.warn('attendance is not an array');
+                data.attendance = [];
+            }
+            
+            // Check summary object
+            if (!data.summary) {
+                console.warn('Missing summary in data');
+                // Create a summary based on available data
+                const completedAssignments = Array.isArray(data.assignments) 
+                    ? data.assignments.filter(a => a.status === 'complete').length
+                    : 0;
+                    
+                const pendingAssignments = Array.isArray(data.assignments)
+                    ? data.assignments.filter(a => a.status === 'pending').length
+                    : 0;
+                    
+                const overallAttendance = Array.isArray(data.attendance) && data.attendance.length > 0
+                    ? data.attendance.reduce((sum, month) => sum + (parseFloat(month.percentage) || 0), 0) / data.attendance.length
+                    : 0;
+                    
+                data.summary = {
+                    totalSubjects: Array.isArray(data.subjectProgress) ? data.subjectProgress.length : 0,
+                    completedAssignments,
+                    pendingAssignments,
+                    attendancePercentage: `${overallAttendance.toFixed(1)}%`
+                };
+            }
+            
+            return data;
+        }
 
         // Populate Student Information
         function populateStudentInfo(data) {
-            document.getElementById('studentName').textContent = data.name;
-            document.getElementById('studentClass').textContent = data.class;
-            document.getElementById('admissionNo').textContent = data.admissionNo;
-            document.getElementById('rollNo').textContent = data.rollNo;
-            document.getElementById('dob').textContent = data.dob;
-            document.getElementById('contact').textContent = data.contact;
-            document.getElementById('studentPhoto').src = data.photoUrl;
+            if (!data) return;
+            
+            document.getElementById('studentName').textContent = data.name || 'Unknown';
+            document.getElementById('studentClass').textContent = data.class || 'Unknown';
+            document.getElementById('admissionNo').textContent = data.admissionNo || '-';
+            document.getElementById('rollNo').textContent = data.rollNo || '-';
+            document.getElementById('dob').textContent = data.dob || '-';
+            document.getElementById('contact').textContent = data.contact || '-';
+            
+            // Only update photo if there's a valid URL
+            if (data.photoUrl) {
+                document.getElementById('studentPhoto').src = data.photoUrl;
+            }
         }
 
         // Populate Dashboard Summary
         function populateSummary(data) {
-            document.getElementById('totalSubjects').textContent = data.totalSubjects;
-            document.getElementById('completedAssignments').textContent = data.completedAssignments;
-            document.getElementById('pendingAssignments').textContent = data.pendingAssignments;
-            document.getElementById('attendancePercentage').textContent = data.attendancePercentage;
+            if (!data) return;
+            
+            document.getElementById('totalSubjects').textContent = data.totalSubjects || '0';
+            document.getElementById('completedAssignments').textContent = data.completedAssignments || '0';
+            document.getElementById('pendingAssignments').textContent = data.pendingAssignments || '0';
+            document.getElementById('attendancePercentage').textContent = data.attendancePercentage || '0.0%';
         }
 
         // Populate Subject Progress Cards
@@ -1278,21 +1343,33 @@
             const container = document.getElementById('subjectProgressCards');
             container.innerHTML = '';
 
+            if (!data || data.length === 0) {
+                container.innerHTML = '<div class="empty-state">No subject progress data available.</div>';
+                return;
+            }
+
             data.forEach(subject => {
-                const colorClass = subject.progress >= 90 ? '#10b981' : 
-                                subject.progress >= 80 ? '#3b82f6' : 
-                                subject.progress >= 70 ? '#f59e0b' : '#ef4444';
+                // Ensure progress is a valid number
+                let progress = 0;
+                if (subject.progress !== null && subject.progress !== undefined) {
+                    progress = parseFloat(subject.progress);
+                    if (isNaN(progress)) progress = 0;
+                }
+                
+                const colorClass = progress >= 90 ? '#10b981' : 
+                                progress >= 80 ? '#3b82f6' : 
+                                progress >= 70 ? '#f59e0b' : '#ef4444';
                 
                 const card = document.createElement('div');
                 card.className = 'progress-card';
                 card.innerHTML = `
-                    <div class="progress-title">${subject.subject}</div>
+                    <div class="progress-title">${subject.subject || 'Unknown Subject'}</div>
                     <div class="progress-bar">
-                        <div class="progress-value" style="width: ${subject.progress}%; background-color: ${colorClass};"></div>
+                        <div class="progress-value" style="width: ${progress}%; background-color: ${colorClass};"></div>
                     </div>
                     <div class="progress-stats">
                         <div class="progress-label">Progress</div>
-                        <div class="progress-percentage">${subject.progress}%</div>
+                        <div class="progress-percentage">${progress}%</div>
                     </div>
                 `;
                 container.appendChild(card);
@@ -1304,6 +1381,11 @@
             const tbody = document.getElementById('recentTestsTable');
             tbody.innerHTML = '';
 
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No recent test data available.</td></tr>';
+                return;
+            }
+
             data.forEach(test => {
                 const gradeClass = test.grade === 'A' ? 'grade-a' : 
                                 test.grade === 'B' ? 'grade-b' : 
@@ -1311,11 +1393,11 @@
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${test.subject}</td>
-                    <td>${test.name}</td>
-                    <td>${test.date}</td>
-                    <td>${test.marks}</td>
-                    <td><span class="grade-badge ${gradeClass}">${test.grade}</span></td>
+                    <td>${test.subject || 'Unknown'}</td>
+                    <td>${test.name || 'Unknown'}</td>
+                    <td>${test.date || '-'}</td>
+                    <td>${test.marks || '-'}</td>
+                    <td><span class="grade-badge ${gradeClass}">${test.grade || '-'}</span></td>
                 `;
                 tbody.appendChild(row);
             });
@@ -1326,18 +1408,26 @@
             const tbody = document.getElementById('subjectActivitiesTable');
             tbody.innerHTML = '';
 
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No subject activities available.</td></tr>';
+                return;
+            }
+
             data.forEach(activity => {
-                const statusClass = activity.status === 'complete' ? 'status-complete' : 
-                                 activity.status === 'pending' ? 'status-pending' : 'status-overdue';
+                const status = (activity.status || '').toLowerCase();
+                const statusClass = status === 'complete' ? 'status-complete' : 
+                                 status === 'pending' ? 'status-pending' : 'status-overdue';
                 
-                const statusText = activity.status.charAt(0).toUpperCase() + activity.status.slice(1);
+                const statusText = activity.status 
+                    ? activity.status.charAt(0).toUpperCase() + activity.status.slice(1)
+                    : 'Pending';
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${activity.subject}</td>
-                    <td>${activity.activity}</td>
-                    <td>${activity.date}</td>
-                    <td>${activity.description}</td>
+                    <td>${activity.subject || 'Unknown'}</td>
+                    <td>${activity.activity || 'Unknown'}</td>
+                    <td>${activity.date || '-'}</td>
+                    <td>${activity.description || '-'}</td>
                     <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                 `;
                 tbody.appendChild(row);
@@ -1349,20 +1439,28 @@
             const tbody = document.getElementById('assignmentsTable');
             tbody.innerHTML = '';
 
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No assignments available.</td></tr>';
+                return;
+            }
+
             data.forEach(assignment => {
-                const statusClass = assignment.status === 'complete' ? 'status-complete' : 
-                                 assignment.status === 'pending' ? 'status-pending' : 'status-overdue';
+                const status = (assignment.status || '').toLowerCase();
+                const statusClass = status === 'complete' ? 'status-complete' : 
+                                 status === 'pending' ? 'status-pending' : 'status-overdue';
                 
-                const statusText = assignment.status.charAt(0).toUpperCase() + assignment.status.slice(1);
+                const statusText = assignment.status 
+                    ? assignment.status.charAt(0).toUpperCase() + assignment.status.slice(1)
+                    : 'Pending';
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${assignment.subject}</td>
-                    <td>${assignment.name}</td>
-                    <td>${assignment.assignedDate}</td>
-                    <td>${assignment.dueDate}</td>
+                    <td>${assignment.subject || 'Unknown'}</td>
+                    <td>${assignment.name || 'Unknown'}</td>
+                    <td>${assignment.assignedDate || '-'}</td>
+                    <td>${assignment.dueDate || '-'}</td>
                     <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                    <td>${assignment.remarks}</td>
+                    <td>${assignment.remarks || '-'}</td>
                 `;
                 tbody.appendChild(row);
             });
@@ -1373,20 +1471,32 @@
             const tbody = document.getElementById('testsTable');
             tbody.innerHTML = '';
 
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No test data available.</td></tr>';
+                return;
+            }
+
             data.forEach(test => {
+                // Ensure percentage is a valid number and format it
+                let percentage = 0;
+                if (test.percentage !== null && test.percentage !== undefined) {
+                    percentage = parseFloat(test.percentage);
+                    if (isNaN(percentage)) percentage = 0;
+                }
+                
                 const gradeClass = test.grade === 'A' ? 'grade-a' : 
                                 test.grade === 'B' ? 'grade-b' : 
                                 test.grade === 'C' ? 'grade-c' : 'grade-d';
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${test.subject}</td>
-                    <td>${test.name}</td>
-                    <td>${test.date}</td>
-                    <td>${test.maxMarks}</td>
-                    <td>${test.marksObtained}</td>
-                    <td>${test.percentage}%</td>
-                    <td><span class="grade-badge ${gradeClass}">${test.grade}</span></td>
+                    <td>${test.subject || 'Unknown'}</td>
+                    <td>${test.name || 'Unknown'}</td>
+                    <td>${test.date || '-'}</td>
+                    <td>${test.maxMarks || '0'}</td>
+                    <td>${test.marksObtained || '0'}</td>
+                    <td>${percentage.toFixed(1)}%</td>
+                    <td><span class="grade-badge ${gradeClass}">${test.grade || '-'}</span></td>
                 `;
                 tbody.appendChild(row);
             });
@@ -1397,14 +1507,19 @@
             const tbody = document.getElementById('correctionsTable');
             tbody.innerHTML = '';
 
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No copy correction data available.</td></tr>';
+                return;
+            }
+
             data.forEach(correction => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${correction.subject}</td>
-                    <td>${correction.copyType}</td>
-                    <td>${correction.date}</td>
-                    <td>${correction.improvements}</td>
-                    <td>${correction.remarks}</td>
+                    <td>${correction.subject || 'Unknown'}</td>
+                    <td>${correction.copyType || 'Unknown'}</td>
+                    <td>${correction.date || '-'}</td>
+                    <td>${correction.improvements || '-'}</td>
+                    <td>${correction.remarks || '-'}</td>
                 `;
                 tbody.appendChild(row);
             });
@@ -1415,28 +1530,52 @@
             const tbody = document.getElementById('attendanceTable');
             tbody.innerHTML = '';
 
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No attendance data available.</td></tr>';
+                return;
+            }
+
             data.forEach(month => {
+                // Ensure percentage is a valid number
+                let percentage = 0;
+                if (month.percentage !== null && month.percentage !== undefined) {
+                    percentage = parseFloat(month.percentage);
+                    if (isNaN(percentage)) percentage = 0;
+                }
+                
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${month.month}</td>
-                    <td>${month.workingDays}</td>
-                    <td>${month.present}</td>
-                    <td>${month.absent}</td>
-                    <td>${month.percentage.toFixed(1)}%</td>
+                    <td>${month.month || 'Unknown'}</td>
+                    <td>${month.workingDays || '0'}</td>
+                    <td>${month.present || '0'}</td>
+                    <td>${month.absent || '0'}</td>
+                    <td>${percentage.toFixed(1)}%</td>
                 `;
                 tbody.appendChild(row);
             });
         }
 
-        // Filter handlers
+        // Filter handlers - Updated for better error handling with empty arrays
         function setupFilters(data) {
+            // Get unique subjects from all data
+            const subjects = getUniqueSubjects(data);
+            
+            // Also get unique months for attendance filter
+            const months = getUniqueMonths(data.attendance);
+            
+            // Update filter dropdowns
+            updateFilterOptions('subjectFilter', subjects);
+            updateFilterOptions('testSubjectFilter', subjects);
+            updateFilterOptions('correctionSubjectFilter', subjects);
+            updateFilterOptions('attendanceMonthFilter', months);
+            
             // Subject filter for activities
             document.getElementById('subjectFilter').addEventListener('change', e => {
                 const selectedSubject = e.target.value;
-                let filteredData = data.subjectActivities;
+                let filteredData = data.subjectActivities || [];
                 
-                if (selectedSubject !== 'all') {
-                    filteredData = data.subjectActivities.filter(activity => activity.subject === selectedSubject);
+                if (selectedSubject !== 'all' && filteredData.length > 0) {
+                    filteredData = filteredData.filter(activity => activity.subject === selectedSubject);
                 }
                 
                 populateSubjectActivities(filteredData);
@@ -1445,10 +1584,11 @@
             // Assignment status filter
             document.getElementById('assignmentStatusFilter').addEventListener('change', e => {
                 const selectedStatus = e.target.value;
-                let filteredData = data.assignments;
+                let filteredData = data.assignments || [];
                 
-                if (selectedStatus !== 'all') {
-                    filteredData = data.assignments.filter(assignment => assignment.status === selectedStatus);
+                if (selectedStatus !== 'all' && filteredData.length > 0) {
+                    filteredData = filteredData.filter(assignment => 
+                        (assignment.status || '').toLowerCase() === selectedStatus);
                 }
                 
                 populateAssignments(filteredData);
@@ -1457,10 +1597,10 @@
             // Test subject filter
             document.getElementById('testSubjectFilter').addEventListener('change', e => {
                 const selectedSubject = e.target.value;
-                let filteredData = data.tests;
+                let filteredData = data.tests || [];
                 
-                if (selectedSubject !== 'all') {
-                    filteredData = data.tests.filter(test => test.subject === selectedSubject);
+                if (selectedSubject !== 'all' && filteredData.length > 0) {
+                    filteredData = filteredData.filter(test => test.subject === selectedSubject);
                 }
                 
                 populateTests(filteredData);
@@ -1469,10 +1609,10 @@
             // Correction subject filter
             document.getElementById('correctionSubjectFilter').addEventListener('change', e => {
                 const selectedSubject = e.target.value;
-                let filteredData = data.corrections;
+                let filteredData = data.corrections || [];
                 
-                if (selectedSubject !== 'all') {
-                    filteredData = data.corrections.filter(correction => correction.subject === selectedSubject);
+                if (selectedSubject !== 'all' && filteredData.length > 0) {
+                    filteredData = filteredData.filter(correction => correction.subject === selectedSubject);
                 }
                 
                 populateCorrections(filteredData);
@@ -1481,32 +1621,122 @@
             // Attendance month filter
             document.getElementById('attendanceMonthFilter').addEventListener('change', e => {
                 const selectedMonth = e.target.value;
-                let filteredData = data.attendance;
+                let filteredData = data.attendance || [];
                 
-                if (selectedMonth !== 'all') {
-                    filteredData = data.attendance.filter(record => record.month === selectedMonth);
+                if (selectedMonth !== 'all' && filteredData.length > 0) {
+                    filteredData = filteredData.filter(record => record.month === selectedMonth);
                 }
                 
                 populateAttendance(filteredData);
             });
         }
+        
+        // Helper function to get unique subjects across all data
+        function getUniqueSubjects(data) {
+            const subjects = new Set();
+            
+            // Add subjects from each data array
+            if (data.subjectProgress && Array.isArray(data.subjectProgress)) {
+                data.subjectProgress.forEach(item => {
+                    if (item && item.subject) subjects.add(item.subject);
+                });
+            }
+            
+            if (data.subjectActivities && Array.isArray(data.subjectActivities)) {
+                data.subjectActivities.forEach(item => {
+                    if (item && item.subject) subjects.add(item.subject);
+                });
+            }
+            
+            if (data.assignments && Array.isArray(data.assignments)) {
+                data.assignments.forEach(item => {
+                    if (item && item.subject) subjects.add(item.subject);
+                });
+            }
+            
+            if (data.tests && Array.isArray(data.tests)) {
+                data.tests.forEach(item => {
+                    if (item && item.subject) subjects.add(item.subject);
+                });
+            }
+            
+            if (data.corrections && Array.isArray(data.corrections)) {
+                data.corrections.forEach(item => {
+                    if (item && item.subject) subjects.add(item.subject);
+                });
+            }
+            
+            return Array.from(subjects).sort();
+        }
+        
+        // Helper function to get unique months from attendance data
+        function getUniqueMonths(attendanceData) {
+            if (!attendanceData || !Array.isArray(attendanceData)) return [];
+            
+            const months = new Set();
+            attendanceData.forEach(item => {
+                if (item && item.month) months.add(item.month);
+            });
+            
+            return Array.from(months).sort();
+        }
+        
+        // Helper function to update filter dropdown options
+        function updateFilterOptions(filterId, options) {
+            const filter = document.getElementById(filterId);
+            if (!filter) return;
+            
+            // Keep the "All" option
+            const allOption = filter.options[0];
+            
+            // Clear existing options except "All"
+            filter.innerHTML = '';
+            filter.appendChild(allOption);
+            
+            // Add new options
+            options.forEach(option => {
+                if (!option) return; // Skip empty options
+                
+                const optionEl = document.createElement('option');
+                optionEl.value = option;
+                optionEl.textContent = option;
+                filter.appendChild(optionEl);
+            });
+        }
 
-        // Initialize all data
+        // Initialize all data with improved error handling
         async function initializeData() {
             try {
                 console.log('Initializing data');
+                
+                // Show loading indicators
+                document.querySelectorAll('.loading').forEach(loader => {
+                    loader.style.display = 'flex';
+                });
+                
                 const data = await fetchData();
                 
+                // Hide all loading indicators
+                document.querySelectorAll('.loading').forEach(loader => {
+                    loader.style.display = 'none';
+                });
+                
                 // Populate all sections with data
-                populateStudentInfo(data.studentInfo);
-                populateSummary(data.summary);
-                populateSubjectProgress(data.subjectProgress);
-                populateRecentTests(data.recentTests);
-                populateSubjectActivities(data.subjectActivities);
-                populateAssignments(data.assignments);
-                populateTests(data.tests);
-                populateCorrections(data.corrections);
-                populateAttendance(data.attendance);
+                if (data.studentInfo) {
+                    populateStudentInfo(data.studentInfo);
+                }
+                
+                if (data.summary) {
+                    populateSummary(data.summary);
+                }
+                
+                populateSubjectProgress(data.subjectProgress || []);
+                populateRecentTests(data.recentTests || []);
+                populateSubjectActivities(data.subjectActivities || []);
+                populateAssignments(data.assignments || []);
+                populateTests(data.tests || []);
+                populateCorrections(data.corrections || []);
+                populateAttendance(data.attendance || []);
                 
                 // Setup filters
                 setupFilters(data);
@@ -1514,7 +1744,7 @@
                 console.error('Error loading data:', error);
                 // Display error message to user
                 document.querySelectorAll('.loading').forEach(loader => {
-                    loader.innerHTML = '<p>Error loading data. Please try again later.</p>';
+                    loader.innerHTML = `<p>Error loading data: ${error.message}</p>`;
                 });
             }
         }
