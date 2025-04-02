@@ -1414,12 +1414,13 @@
             }
 
             data.forEach(activity => {
-                const status = (activity.status || '').toLowerCase();
+                // Normalize status to lowercase and trim any whitespace
+                const status = (activity.status || '').toLowerCase().trim();
                 const statusClass = status === 'complete' ? 'status-complete' : 
                                  status === 'pending' ? 'status-pending' : 'status-overdue';
                 
                 const statusText = activity.status 
-                    ? activity.status.charAt(0).toUpperCase() + activity.status.slice(1)
+                    ? activity.status.charAt(0).toUpperCase() + activity.status.slice(1).toLowerCase()
                     : 'Pending';
                 
                 const row = document.createElement('tr');
@@ -1445,12 +1446,13 @@
             }
 
             data.forEach(assignment => {
-                const status = (assignment.status || '').toLowerCase();
+                // Normalize status to lowercase and trim any whitespace
+                const status = (assignment.status || '').toLowerCase().trim();
                 const statusClass = status === 'complete' ? 'status-complete' : 
                                  status === 'pending' ? 'status-pending' : 'status-overdue';
                 
                 const statusText = assignment.status 
-                    ? assignment.status.charAt(0).toUpperCase() + assignment.status.slice(1)
+                    ? assignment.status.charAt(0).toUpperCase() + assignment.status.slice(1).toLowerCase()
                     : 'Pending';
                 
                 const row = document.createElement('tr');
@@ -1588,7 +1590,7 @@
                 
                 if (selectedStatus !== 'all' && filteredData.length > 0) {
                     filteredData = filteredData.filter(assignment => 
-                        (assignment.status || '').toLowerCase() === selectedStatus);
+                        (assignment.status || '').toLowerCase().trim() === selectedStatus);
                 }
                 
                 populateAssignments(filteredData);
