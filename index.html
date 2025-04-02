@@ -1289,11 +1289,11 @@
                 console.warn('Missing summary in data');
                 // Create a summary based on available data
                 const completedAssignments = Array.isArray(data.assignments) 
-                    ? data.assignments.filter(a => a.status === 'complete').length
+                    ? data.assignments.filter(a => (a.status || '').toLowerCase().trim() === 'complete').length
                     : 0;
                     
                 const pendingAssignments = Array.isArray(data.assignments)
-                    ? data.assignments.filter(a => a.status === 'pending').length
+                    ? data.assignments.filter(a => (a.status || '').toLowerCase().trim() === 'pending').length
                     : 0;
                     
                 const overallAttendance = Array.isArray(data.attendance) && data.attendance.length > 0
