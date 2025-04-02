@@ -1328,7 +1328,62 @@
             }
         }
 
-        // Populate Dashboard Summary
+        // NEW FUNCTION: Calculate and update dashboard summary directly 
+        function updateDashboardSummary(data) {
+            console.log('Updating dashboard summary with latest counts');
+            
+            // Get completed and pending assignment counts directly from the assignments array
+            const completedAssignments = Array.isArray(data.assignments) 
+                ? data.assignments.filter(a => (a.status || '').toLowerCase().trim() === 'complete').length
+                : 0;
+                
+            const pendingAssignments = Array.isArray(data.assignments)
+                ? data.assignments.filter(a => (a.status || '').toLowerCase().trim() === 'pending').length
+                : 0;
+            
+            // Get total unique subjects from assignments
+            const uniqueSubjects = new Set();
+            if (Array.isArray(data.assignments)) {
+                data.assignments.forEach(assignment => {
+                    if (assignment.subject) {
+                        uniqueSubjects.add(assignment.subject);
+                    }
+                });
+            }
+            
+            // Get attendance percentage
+            let attendancePercentage = "0.0%";
+            if (data.summary && data.summary.attendancePercentage) {
+                attendancePercentage = data.summary.attendancePercentage;
+            } else if (Array.isArray(data.attendance) && data.attendance.length > 0) {
+                const avgAttendance = data.attendance.reduce((sum, month) => {
+                    const percentage = parseFloat(month.percentage || 0);
+                    return sum + (isNaN(percentage) ? 0 : percentage);
+                }, 0) / data.attendance.length;
+                
+                attendancePercentage = `${avgAttendance.toFixed(1)}%`;
+            }
+            
+            // Update the DOM
+            document.getElementById('totalSubjects').textContent = uniqueSubjects.size || '0';
+            document.getElementById('completedAssignments').textContent = completedAssignments || '0';
+            document.getElementById('pendingAssignments').textContent = pendingAssignments || '0';
+            document.getElementById('attendancePercentage').textContent = attendancePercentage;
+            
+            // Also update the summary object in data (in case it's used elsewhere)
+            if (!data.summary) {
+                data.summary = {};
+            }
+            
+            data.summary.totalSubjects = uniqueSubjects.size;
+            data.summary.completedAssignments = completedAssignments;
+            data.summary.pendingAssignments = pendingAssignments;
+            data.summary.attendancePercentage = attendancePercentage;
+            
+            console.log(`Dashboard updated: ${uniqueSubjects.size} subjects, ${completedAssignments} completed assignments, ${pendingAssignments} pending assignments`);
+        }
+
+        // Legacy function - not used anymore
         function populateSummary(data) {
             if (!data) return;
             
@@ -1723,14 +1778,18 @@
                     loader.style.display = 'none';
                 });
                 
+                // Update dashboard counts before showing data
+                updateDashboardSummary(data);
+                
                 // Populate all sections with data
                 if (data.studentInfo) {
                     populateStudentInfo(data.studentInfo);
                 }
                 
-                if (data.summary) {
-                    populateSummary(data.summary);
-                }
+                // We're no longer using the API's summary values
+                // if (data.summary) {
+                //     populateSummary(data.summary);
+                // }
                 
                 populateSubjectProgress(data.subjectProgress || []);
                 populateRecentTests(data.recentTests || []);
