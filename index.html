@@ -1052,7 +1052,7 @@
     </div>
 
     <script>
-        // Handle student photo loading errors and initialize debug functionality
+        // Handle student photo loading errors
         document.addEventListener('DOMContentLoaded', function() {
             const studentPhoto = document.getElementById('studentPhoto');
             
@@ -1060,35 +1060,6 @@
                 console.log('Student photo failed to load, using placeholder');
                 this.src = 'https://i.ibb.co/23DtsDdF/kvs-logo-new.jpg';  // Show school logo as fallback
             };
-            
-            // Add debug functionality triggered by specific key combination (Shift+Ctrl+D)
-            // This helps diagnose status issues without modifying the UI
-            let keySequence = [];
-            document.addEventListener('keydown', function(e) {
-                keySequence.push(e.key);
-                if (keySequence.length > 3) keySequence.shift();
-                
-                // Check for debug key sequence
-                if (e.shiftKey && e.ctrlKey && e.key === 'd') {
-                    console.log('DEBUG MODE ACTIVATED');
-                    
-                    // Get current data from memory (if authenticated)
-                    if (localStorage.getItem('kv_authenticated')) {
-                        const data = window.currentData; // This will be set in fetchData
-                        
-                        if (data && data.subjectActivities) {
-                            console.log('SUBJECT ACTIVITIES DEBUG:');
-                            data.subjectActivities.forEach((activity, i) => {
-                                console.log(`Activity ${i+1}:`, activity);
-                                console.log(`  Subject: ${activity.subject}`);
-                                console.log(`  Status: ${activity.status} (${typeof activity.status})`);
-                                console.log(`  Is 'Complete' test: `, 
-                                    String(activity.status).toLowerCase().includes('complete'));
-                            });
-                        }
-                    }
-                }
-            });
         });
         
         // Login form handling
@@ -1110,12 +1081,6 @@
                 console.log('Is valid format:', isValid);
                 
                 if (isValid) {
-                    // Show loading message while data is being fetched
-                    const loginBtn = document.getElementById('loginButton');
-                    const originalBtnText = loginBtn.textContent;
-                    loginBtn.textContent = "Loading...";
-                    loginBtn.disabled = true;
-                    
                     // Store authentication locally
                     localStorage.setItem('kv_authenticated', 'true');
                     localStorage.setItem('kv_admission_number', admissionNumber);
@@ -1124,14 +1089,8 @@
                     document.getElementById('loginOverlay').style.display = 'none';
                     document.getElementById('mainContent').classList.add('authenticated');
                     
-                    // Load student data with a slight delay to show loading state
-                    setTimeout(() => {
-                        initializeData().then(() => {
-                            // Reset button state after data is loaded
-                            loginBtn.textContent = originalBtnText;
-                            loginBtn.disabled = false;
-                        });
-                    }, 500);
+                    // Load student data
+                    initializeData();
                 } else {
                     // Show error
                     admissionInput.classList.add('error');
@@ -1198,183 +1157,44 @@
         // IMPROVED: Fetch data function with better error handling for horizontal data structure
         async function fetchData() {
             const API_BASE_URL = 'https://student-portfolio-api.onrender.com';
-            const MAX_RETRIES = 2;
-            let retryCount = 0;
             
             try {
                 // Get the admission number from localStorage
                 const admissionNumber = localStorage.getItem('kv_admission_number');
                 console.log(`Fetching data for admission number: ${admissionNumber}`);
                 
-                // Use mock data if we're in a GitHub Pages environment
-                if (window.location.hostname.includes('github.io') || 
-                    window.location.hostname.includes('kvsecontent')) {
-                    console.log('GitHub Pages environment detected, using mock data');
-                    return getMockData(admissionNumber);
-                }
-                
-                // Function to retry data fetching
-                async function attemptFetch() {
-                    try {
-                        // Check API status first
-                        console.log(`Checking API status at: ${API_BASE_URL}/api/status`);
-                        const statusResponse = await Promise.race([
-                            fetch(`${API_BASE_URL}/api/status`),
-                            new Promise((_, reject) => 
-                                setTimeout(() => reject(new Error('API status check timeout')), 5000)
-                            )
-                        ]);
-                        
-                        const statusData = await statusResponse.json();
-                        console.log('API Status:', statusData);
-                        
-                        if (!statusData.sheetsConfigured) {
-                            console.warn('Google Sheets not properly configured on backend');
-                        }
-                        
-                        // Fetch student data with cache-busting to ensure fresh data
-                        const cacheBuster = new Date().getTime();
-                        console.log(`Making request to: ${API_BASE_URL}/api/student-data?admission=${admissionNumber}&_=${cacheBuster}`);
-                        const dataResponse = await Promise.race([
-                            fetch(`${API_BASE_URL}/api/student-data?admission=${admissionNumber}&_=${cacheBuster}`, {
-                                cache: 'no-cache', // Force bypass cache
-                                headers: {
-                                    'Pragma': 'no-cache', // For older browsers
-                                    'Cache-Control': 'no-cache' // Modern browsers
-                                }
-                            }),
-                            new Promise((_, reject) => 
-                                setTimeout(() => reject(new Error('Data fetch timeout')), 8000)
-                            )
-                        ]);
-                        
-                        if (!dataResponse.ok) {
-                            const errorText = await dataResponse.text();
-                            console.error('API Error Response:', errorText);
-                            throw new Error(`Failed to fetch student data: ${dataResponse.status} ${dataResponse.statusText}`);
-                        }
-                        
-                        const data = await dataResponse.json();
-                        console.log('Successfully received data:', data);
-                        
-                        // Log each subject activity for debugging
-                        if (data.subjectActivities && Array.isArray(data.subjectActivities)) {
-                            console.log('Subject Activities Data:', data.subjectActivities);
-                            data.subjectActivities.forEach((activity, index) => {
-                                console.log(`Activity ${index}:`, activity);
-                                console.log(`  - Subject: ${activity.subject}, Status: ${activity.status}`);
-                                
-                                // Fix for Complete status - normalize the status field
-                                if (activity.status && 
-                                    (String(activity.status).toLowerCase().includes('complete') || 
-                                     String(activity.status).toLowerCase().includes('complet'))) {
-                                    console.log(`  - Fixing status for ${activity.subject} from "${activity.status}" to "Complete"`);
-                                    activity.status = 'Complete';
-                                }
-                            });
-                        }
-                        
-                        // Store in window object for debug access
-                        window.currentData = data;
-                        
-                        // Validate data structure
-                        validateDataStructure(data);
-                        
-                        return data;
-                    } catch (error) {
-                        if (retryCount < MAX_RETRIES) {
-                            retryCount++;
-                            console.log(`Retry attempt ${retryCount} of ${MAX_RETRIES}`);
-                            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait before retrying
-                            return attemptFetch();
-                        }
-                        throw error;
+                // Check API status first
+                try {
+                    console.log(`Checking API status at: ${API_BASE_URL}/api/status`);
+                    const statusResponse = await fetch(`${API_BASE_URL}/api/status`);
+                    const statusData = await statusResponse.json();
+                    console.log('API Status:', statusData);
+                    
+                    if (!statusData.sheetsConfigured) {
+                        console.warn('Google Sheets not properly configured on backend');
                     }
+                } catch (statusError) {
+                    console.error('API Status Check Failed:', statusError);
+                    throw new Error('Cannot connect to the backend server. Please try again later.');
                 }
                 
-                return await attemptFetch();
-            } catch (error) {
-                console.error('Error fetching data after retries:', error);
+                // Fetch student data
+                console.log(`Making request to: ${API_BASE_URL}/api/student-data?admission=${admissionNumber}`);
+                const dataResponse = await fetch(`${API_BASE_URL}/api/student-data?admission=${admissionNumber}`);
                 
-                // Show error message to user
-                const errorMessage = error.message || 'Failed to fetch. Please try again later.';
-                alert(`Error loading data: ${errorMessage}`);
+                if (!dataResponse.ok) {
+                    const errorText = await dataResponse.text();
+                    console.error('API Error Response:', errorText);
+                    throw new Error(`Failed to fetch student data: ${dataResponse.status} ${dataResponse.statusText}`);
+                }
                 
-                // Return mock data as fallback
-                return getMockData(admissionNumber);
-            }
-        }
-        
-        // Function to provide mock data when API is unreachable
-        function getMockData(admissionNumber) {
-            console.log('Using mock data for the student portfolio');
-            
-            // Get the student name from the URL parameters if available
-            const urlParams = new URLSearchParams(window.location.search);
-            const studentName = urlParams.get('name') || 'Demo Student';
-            
-            // Create realistic mock data for the student
-            return {
-                studentInfo: {
-                    name: studentName,
-                    class: "Class X-A",
-                    admissionNo: admissionNumber || "12345",
-                    rollNo: "10",
-                    dob: "09/02/2017",
-                    contact: "89574548XX",
-                    photoUrl: "/api/placeholder/120/120" // Placeholder image
-                },
-                summary: {
-                    totalSubjects: 5,
-                    completedAssignments: 12,
-                    pendingAssignments: 3,
-                    attendancePercentage: "95.2%"
-                },
-                subjectProgress: [
-                    { subject: "Mathematics", progress: 92 },
-                    { subject: "Science", progress: 87 },
-                    { subject: "English", progress: 95 },
-                    { subject: "Hindi", progress: 88 },
-                    { subject: "Social Science", progress: 82 }
-                ],
-                recentTests: [
-                    { subject: "Mathematics", name: "Unit Test 2", date: "15/03/2025", marks: "18/20", grade: "A" },
-                    { subject: "Science", name: "Practical Assessment", date: "10/03/2025", marks: "28/30", grade: "A" },
-                    { subject: "English", name: "Grammar Quiz", date: "05/03/2025", marks: "24/25", grade: "A" }
-                ],
-                subjectActivities: [
-                    { subject: "Mathematics", activity: "Air has weight", date: "07/04/2025", description: "Demonstrate air has weight using balloons and a stick-thread balance.", status: "Complete" },
-                    { subject: "Science", activity: "Plant Growth Experiment", date: "02/04/2025", description: "Set up and monitor bean sprouting under different light conditions.", status: "Complete" },
-                    { subject: "English", activity: "Story Writing", date: "12/04/2025", description: "Write a short story on the theme of friendship.", status: "Pending" },
-                    { subject: "Hindi", activity: "Poetry Recitation", date: "14/04/2025", description: "Memorize and recite the poem 'Mera Bharat'.", status: "Pending" },
-                    { subject: "T W A U", activity: "Air has weight", date: "07/04/2025", description: "Demonstrate air has weight using balloons and a stick-thread balance.", status: "Complete" }
-                ],
-                assignments: [
-                    { subject: "Mathematics", name: "Quadratic Equations", assignedDate: "01/04/2025", dueDate: "08/04/2025", status: "Complete", remarks: "Well done!" },
-                    { subject: "Science", name: "Reflection of Light", assignedDate: "28/03/2025", dueDate: "05/04/2025", status: "Complete", remarks: "Excellent drawings" },
-                    { subject: "English", name: "Book Review", assignedDate: "02/04/2025", dueDate: "16/04/2025", status: "Pending", remarks: "" },
-                    { subject: "Hindi", name: "Letter Writing", assignedDate: "05/04/2025", dueDate: "12/04/2025", status: "Pending", remarks: "" },
-                    { subject: "Social Science", name: "Map Work", assignedDate: "29/03/2025", dueDate: "05/04/2025", status: "Complete", remarks: "Good work" }
-                ],
-                tests: [
-                    { subject: "Mathematics", name: "Unit Test 2", date: "15/03/2025", maxMarks: 20, marksObtained: 18, percentage: 90, grade: "A" },
-                    { subject: "Science", name: "Practical Assessment", date: "10/03/2025", maxMarks: 30, marksObtained: 28, percentage: 93.3, grade: "A" },
-                    { subject: "English", name: "Grammar Quiz", date: "05/03/2025", maxMarks: 25, marksObtained: 24, percentage: 96, grade: "A" },
-                    { subject: "Hindi", name: "Half-Yearly", date: "20/02/2025", maxMarks: 80, marksObtained: 72, percentage: 90, grade: "A" },
-                    { subject: "Social Science", name: "Project Evaluation", date: "25/02/2025", maxMarks: 50, marksObtained: 42, percentage: 84, grade: "B" }
-                ],
-                corrections: [
-                    { subject: "Mathematics", copyType: "Classwork", date: "20/03/2025", improvements: "Work on step-by-step solutions", remarks: "Show complete working" },
-                    { subject: "Science", copyType: "Lab Manual", date: "18/03/2025", improvements: "Label diagrams properly", remarks: "Good observations" },
-                    { subject: "English", copyType: "Grammar Book", date: "15/03/2025", improvements: "Focus on tense consistency", remarks: "Handwriting is neat" }
-                ],
-                attendance: [
-                    { month: "January 2025", workingDays: 22, present: 21, absent: 1, percentage: 95.5 },
-                    { month: "February 2025", workingDays: 20, present: 19, absent: 1, percentage: 95.0 },
-                    { month: "March 2025", workingDays: 23, present: 22, absent: 1, percentage: 95.7 }
-                ]
-            };
-        }
+                const data = await dataResponse.json();
+                console.log('Successfully received data:', data);
+                
+                // Validate data structure
+                validateDataStructure(data);
+                
+                return data;
             } catch (error) {
                 console.error('Error fetching data:', error);
                 
@@ -1638,7 +1458,7 @@
             });
         }
 
-        // Populate Subject Activities with improved status handling
+        // Populate Subject Activities
         function populateSubjectActivities(data) {
             const tbody = document.getElementById('subjectActivitiesTable');
             tbody.innerHTML = '';
@@ -1649,39 +1469,14 @@
             }
 
             data.forEach(activity => {
-                // Get raw status value and normalize it
-                const rawStatus = (activity.status || '').trim();
-                const normalizedStatus = rawStatus.toLowerCase().trim();
+                // Normalize status to lowercase and trim any whitespace
+                const status = (activity.status || '').toLowerCase().trim();
+                const statusClass = status === 'complete' ? 'status-complete' : 
+                                 status === 'pending' ? 'status-pending' : 'status-overdue';
                 
-                // Check for any variant of "complete" or "completed"
-                const isComplete = normalizedStatus === 'complete' || 
-                                 normalizedStatus === 'completed' || 
-                                 normalizedStatus.includes('complet');
-                
-                // Check for any variant of "pending"
-                const isPending = normalizedStatus === 'pending' || 
-                               normalizedStatus.includes('pend');
-                
-                // Determine status class based on more flexible matching
-                let statusClass = 'status-pending'; // Default to pending
-                if (isComplete) {
-                    statusClass = 'status-complete';
-                } else if (normalizedStatus.includes('over') || normalizedStatus.includes('due')) {
-                    statusClass = 'status-overdue';
-                }
-                
-                // Normalize the displayed status text
-                let statusText = 'Pending'; // Default
-                if (isComplete) {
-                    statusText = 'Complete';
-                } else if (normalizedStatus.includes('over') || normalizedStatus.includes('due')) {
-                    statusText = 'Overdue';
-                } else if (isPending) {
-                    statusText = 'Pending';
-                } else if (rawStatus) {
-                    // If we can't categorize it, just display the original with first letter capitalized
-                    statusText = rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
-                }
+                const statusText = activity.status 
+                    ? activity.status.charAt(0).toUpperCase() + activity.status.slice(1).toLowerCase()
+                    : 'Pending';
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -1836,19 +1631,6 @@
                 const selectedSubject = e.target.value;
                 let filteredData = data.subjectActivities || [];
                 
-                // Ensure all statuses are correctly formatted before filtering
-                filteredData = filteredData.map(activity => {
-                    // Make a copy to avoid mutation
-                    const updatedActivity = {...activity};
-                    // Fix status formatting for "Complete"
-                    if (updatedActivity.status && 
-                        (String(updatedActivity.status).toLowerCase().includes('complete') || 
-                         String(updatedActivity.status).toLowerCase().includes('complet'))) {
-                        updatedActivity.status = 'Complete';
-                    }
-                    return updatedActivity;
-                });
-                
                 if (selectedSubject !== 'all' && filteredData.length > 0) {
                     filteredData = filteredData.filter(activity => activity.subject === selectedSubject);
                 }
@@ -1989,12 +1771,6 @@
                     loader.style.display = 'flex';
                 });
                 
-                // Clear browser cache for API calls (to ensure fresh data)
-                const cacheBustParam = `?cache=${Date.now()}`;
-                
-                // Add a small delay to ensure any previous requests are completed
-                await new Promise(resolve => setTimeout(resolve, 500));
-                
                 const data = await fetchData();
                 
                 // Hide all loading indicators
@@ -2017,20 +1793,6 @@
                 
                 populateSubjectProgress(data.subjectProgress || []);
                 populateRecentTests(data.recentTests || []);
-                
-                // Fix for subject activities status issue
-                // Make sure all status values are correctly processed
-                if (data.subjectActivities && Array.isArray(data.subjectActivities)) {
-                    data.subjectActivities.forEach(activity => {
-                        // Ensure status is properly set to detect "Complete"
-                        if (activity.status && 
-                            (String(activity.status).toLowerCase().includes('complete') || 
-                             String(activity.status).toLowerCase().includes('complet'))) {
-                            activity.status = 'Complete'; // Standardize complete statuses
-                        }
-                    });
-                }
-                
                 populateSubjectActivities(data.subjectActivities || []);
                 populateAssignments(data.assignments || []);
                 populateTests(data.tests || []);
@@ -2039,71 +1801,13 @@
                 
                 // Setup filters
                 setupFilters(data);
-                
-                // Show data source notification
-                if (window.location.hostname.includes('github.io') || window.location.hostname.includes('kvsecontent')) {
-                    const notification = document.createElement('div');
-                    notification.style.cssText = 'position: fixed; bottom: 10px; right: 10px; background-color: #f8d7da; color: #721c24; padding: 10px 15px; border-radius: 4px; font-size: 14px; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.2);';
-                    notification.innerHTML = 'Using demo data. Live API connection unavailable.';
-                    document.body.appendChild(notification);
-                    
-                    // Auto-hide after 5 seconds
-                    setTimeout(() => {
-                        notification.style.opacity = '0';
-                        notification.style.transition = 'opacity 0.5s ease';
-                        setTimeout(() => notification.remove(), 500);
-                    }, 5000);
-                }
-                
-                return data;
             } catch (error) {
                 console.error('Error loading data:', error);
                 // Display error message to user
                 document.querySelectorAll('.loading').forEach(loader => {
                     loader.innerHTML = `<p>Error loading data: ${error.message}</p>`;
                 });
-                
-                // Show a more descriptive error dialog
-                const errorDialog = document.createElement('div');
-                errorDialog.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 80%; z-index: 1010; text-align: center;';
-                errorDialog.innerHTML = `
-                    <h3 style="margin-top: 0; color: #ef4444;">Data Loading Error</h3>
-                    <p>${error.message || 'Failed to fetch data from the server.'}</p>
-                    <p>The system will continue with demo data.</p>
-                    <button id="errorDialogCloseBtn" style="background-color: #1e40af; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-top: 10px;">OK</button>
-                `;
-                
-                // Add overlay
-                const overlay = document.createElement('div');
-                overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;';
-                
-                // Append to body
-                document.body.appendChild(overlay);
-                document.body.appendChild(errorDialog);
-                
-                // Close dialog when OK is clicked
-                document.getElementById('errorDialogCloseBtn').addEventListener('click', () => {
-                    overlay.remove();
-                    errorDialog.remove();
-                });
-                
-                // Fallback to demo data automatically
-                const demoData = getMockData(localStorage.getItem('kv_admission_number'));
-                updateDashboardSummary(demoData);
-                populateStudentInfo(demoData.studentInfo);
-                populateSubjectProgress(demoData.subjectProgress);
-                populateRecentTests(demoData.recentTests);
-                populateSubjectActivities(demoData.subjectActivities);
-                populateAssignments(demoData.assignments);
-                populateTests(demoData.tests);
-                populateCorrections(demoData.corrections);
-                populateAttendance(demoData.attendance);
-                setupFilters(demoData);
-                
-                return demoData;
             }
-            
-            return null; // Return null if there was an error
         }
     </script>
 </body>
