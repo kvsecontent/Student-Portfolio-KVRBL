@@ -1458,7 +1458,7 @@
             });
         }
 
-        // Simplified approach for Subject Activities based on the working Assignment tab solution
+        // Populate Subject Activities with improved status handling
         function populateSubjectActivities(data) {
             const tbody = document.getElementById('subjectActivitiesTable');
             tbody.innerHTML = '';
@@ -1468,63 +1468,47 @@
                 return;
             }
 
-            console.log('Activity data structure:', data);
-
             data.forEach(activity => {
-                // Simply check for field ending with "_status1" in the activity object
-                let statusValue = 'Pending'; // Default value
+                // Get raw status value and normalize it
+                const rawStatus = (activity.status || '').trim();
+                const normalizedStatus = rawStatus.toLowerCase().trim();
                 
-                // Loop through all properties of the activity object
-                for (const key in activity) {
-                    // If the key ends with '_status1', use its value for status
-                    if (key.endsWith('_status1') && activity[key]) {
-                        statusValue = activity[key];
-                        break;
-                    }
+                // Check for any variant of "complete" or "completed"
+                const isComplete = normalizedStatus === 'complete' || 
+                                 normalizedStatus === 'completed' || 
+                                 normalizedStatus.includes('complet');
+                
+                // Check for any variant of "pending"
+                const isPending = normalizedStatus === 'pending' || 
+                               normalizedStatus.includes('pend');
+                
+                // Determine status class based on more flexible matching
+                let statusClass = 'status-pending'; // Default to pending
+                if (isComplete) {
+                    statusClass = 'status-complete';
+                } else if (normalizedStatus.includes('over') || normalizedStatus.includes('due')) {
+                    statusClass = 'status-overdue';
                 }
                 
-                // Normalize status to lowercase and trim any whitespace - same approach as assignments
-                const status = (statusValue || '').toLowerCase().trim();
-                const statusClass = status === 'complete' ? 'status-complete' : 
-                                 status === 'pending' ? 'status-pending' : 'status-overdue';
-                
-                // Create proper display text (capitalize first letter)
-                const statusText = statusValue ? 
-                    statusValue.charAt(0).toUpperCase() + statusValue.slice(1).toLowerCase() :
-                    'Pending';
-                
-                // Find the most appropriate activity, date, and description fields
-                let activityName = null;
-                let activityDate = null; 
-                let activityDescription = null;
-                let subject = activity.subject || '';
-                
-                // Loop through all properties
-                for (const key in activity) {
-                    // Activity name
-                    if ((key === 'activity' || key.endsWith('_activity1')) && !activityName) {
-                        activityName = activity[key];
-                    }
-                    // Date
-                    if ((key === 'date' || key.endsWith('_date')) && !activityDate) {
-                        activityDate = activity[key];
-                    }
-                    // Description
-                    if ((key === 'description' || key.endsWith('_description')) && !activityDescription) {
-                        activityDescription = activity[key];
-                    }
-                    // Subject (if not already found)
-                    if (key === 'subject' && !subject) {
-                        subject = activity[key];
-                    }
+                // Normalize the displayed status text
+                let statusText = 'Pending'; // Default
+                if (isComplete) {
+                    statusText = 'Complete';
+                } else if (normalizedStatus.includes('over') || normalizedStatus.includes('due')) {
+                    statusText = 'Overdue';
+                } else if (isPending) {
+                    statusText = 'Pending';
+                } else if (rawStatus) {
+                    // If we can't categorize it, just display the original with first letter capitalized
+                    statusText = rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
                 }
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${subject || 'Unknown'}</td>
-                    <td>${activityName || '-'}</td>
-                    <td>${activityDate || '-'}</td>
-                    <td>${activityDescription || '-'}</td>
+                    <td>${activity.subject || 'Unknown'}</td>
+                    <td>${activity.activity || 'Unknown'}</td>
+                    <td>${activity.date || '-'}</td>
+                    <td>${activity.description || '-'}</td>
                     <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                 `;
                 tbody.appendChild(row);
@@ -1852,4 +1836,4 @@
         }
     </script>
 </body>
-</html>    
+</html>
