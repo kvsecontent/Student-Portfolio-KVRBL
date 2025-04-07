@@ -1052,7 +1052,7 @@
     </div>
 
     <script>
-        // Handle student photo loading errors
+        // Handle student photo loading errors and initialize debug functionality
         document.addEventListener('DOMContentLoaded', function() {
             const studentPhoto = document.getElementById('studentPhoto');
             
@@ -1060,6 +1060,35 @@
                 console.log('Student photo failed to load, using placeholder');
                 this.src = 'https://i.ibb.co/23DtsDdF/kvs-logo-new.jpg';  // Show school logo as fallback
             };
+            
+            // Add debug functionality triggered by specific key combination (Shift+Ctrl+D)
+            // This helps diagnose status issues without modifying the UI
+            let keySequence = [];
+            document.addEventListener('keydown', function(e) {
+                keySequence.push(e.key);
+                if (keySequence.length > 3) keySequence.shift();
+                
+                // Check for debug key sequence
+                if (e.shiftKey && e.ctrlKey && e.key === 'd') {
+                    console.log('DEBUG MODE ACTIVATED');
+                    
+                    // Get current data from memory (if authenticated)
+                    if (localStorage.getItem('kv_authenticated')) {
+                        const data = window.currentData; // This will be set in fetchData
+                        
+                        if (data && data.subjectActivities) {
+                            console.log('SUBJECT ACTIVITIES DEBUG:');
+                            data.subjectActivities.forEach((activity, i) => {
+                                console.log(`Activity ${i+1}:`, activity);
+                                console.log(`  Subject: ${activity.subject}`);
+                                console.log(`  Status: ${activity.status} (${typeof activity.status})`);
+                                console.log(`  Is 'Complete' test: `, 
+                                    String(activity.status).toLowerCase().includes('complete'));
+                            });
+                        }
+                    }
+                }
+            });
         });
         
         // Login form handling
@@ -1178,9 +1207,16 @@
                     throw new Error('Cannot connect to the backend server. Please try again later.');
                 }
                 
-                // Fetch student data
-                console.log(`Making request to: ${API_BASE_URL}/api/student-data?admission=${admissionNumber}`);
-                const dataResponse = await fetch(`${API_BASE_URL}/api/student-data?admission=${admissionNumber}`);
+                // Fetch student data with cache-busting to ensure fresh data
+                const cacheBuster = new Date().getTime();
+                console.log(`Making request to: ${API_BASE_URL}/api/student-data?admission=${admissionNumber}&_=${cacheBuster}`);
+                const dataResponse = await fetch(`${API_BASE_URL}/api/student-data?admission=${admissionNumber}&_=${cacheBuster}`, {
+                    cache: 'no-cache', // Force bypass cache
+                    headers: {
+                        'Pragma': 'no-cache', // For older browsers
+                        'Cache-Control': 'no-cache' // Modern browsers
+                    }
+                });
                 
                 if (!dataResponse.ok) {
                     const errorText = await dataResponse.text();
@@ -1190,6 +1226,26 @@
                 
                 const data = await dataResponse.json();
                 console.log('Successfully received data:', data);
+                
+                // Log each subject activity for debugging
+                if (data.subjectActivities && Array.isArray(data.subjectActivities)) {
+                    console.log('Subject Activities Data:', data.subjectActivities);
+                    data.subjectActivities.forEach((activity, index) => {
+                        console.log(`Activity ${index}:`, activity);
+                        console.log(`  - Subject: ${activity.subject}, Status: ${activity.status}`);
+                        
+                        // Fix for Complete status - normalize the status field
+                        if (activity.status && 
+                            (String(activity.status).toLowerCase().includes('complete') || 
+                             String(activity.status).toLowerCase().includes('complet'))) {
+                            console.log(`  - Fixing status for ${activity.subject} from "${activity.status}" to "Complete"`);
+                            activity.status = 'Complete';
+                        }
+                    });
+                }
+                
+                // Store in window object for debug access
+                window.currentData = data;
                 
                 // Validate data structure
                 validateDataStructure(data);
@@ -1656,6 +1712,19 @@
                 const selectedSubject = e.target.value;
                 let filteredData = data.subjectActivities || [];
                 
+                // Ensure all statuses are correctly formatted before filtering
+                filteredData = filteredData.map(activity => {
+                    // Make a copy to avoid mutation
+                    const updatedActivity = {...activity};
+                    // Fix status formatting for "Complete"
+                    if (updatedActivity.status && 
+                        (String(updatedActivity.status).toLowerCase().includes('complete') || 
+                         String(updatedActivity.status).toLowerCase().includes('complet'))) {
+                        updatedActivity.status = 'Complete';
+                    }
+                    return updatedActivity;
+                });
+                
                 if (selectedSubject !== 'all' && filteredData.length > 0) {
                     filteredData = filteredData.filter(activity => activity.subject === selectedSubject);
                 }
@@ -1796,6 +1865,12 @@
                     loader.style.display = 'flex';
                 });
                 
+                // Clear browser cache for API calls (to ensure fresh data)
+                const cacheBustParam = `?cache=${Date.now()}`;
+                
+                // Add a small delay to ensure any previous requests are completed
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
                 const data = await fetchData();
                 
                 // Hide all loading indicators
@@ -1818,6 +1893,20 @@
                 
                 populateSubjectProgress(data.subjectProgress || []);
                 populateRecentTests(data.recentTests || []);
+                
+                // Fix for subject activities status issue
+                // Make sure all status values are correctly processed
+                if (data.subjectActivities && Array.isArray(data.subjectActivities)) {
+                    data.subjectActivities.forEach(activity => {
+                        // Ensure status is properly set to detect "Complete"
+                        if (activity.status && 
+                            (String(activity.status).toLowerCase().includes('complete') || 
+                             String(activity.status).toLowerCase().includes('complet'))) {
+                            activity.status = 'Complete'; // Standardize complete statuses
+                        }
+                    });
+                }
+                
                 populateSubjectActivities(data.subjectActivities || []);
                 populateAssignments(data.assignments || []);
                 populateTests(data.tests || []);
