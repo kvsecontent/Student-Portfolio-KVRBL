@@ -1458,7 +1458,7 @@
             });
         }
 
-        // Populate Subject Activities
+        // Populate Subject Activities - UPDATED to fix status display
         function populateSubjectActivities(data) {
             const tbody = document.getElementById('subjectActivitiesTable');
             tbody.innerHTML = '';
@@ -1469,19 +1469,39 @@
             }
 
             data.forEach(activity => {
+                // First check for standard status field
+                let statusValue = activity.status;
+                
+                // If not found, check for T_W_A_U_activity1_status1 field
+                if (statusValue === undefined) {
+                    if (activity.T_W_A_U_activity1_status1 !== undefined) {
+                        statusValue = activity.T_W_A_U_activity1_status1;
+                    } else {
+                        // If still not found, look for any field containing 'status'
+                        for (const key in activity) {
+                            if (key.toLowerCase().includes('status')) {
+                                statusValue = activity[key];
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                // Default to 'Pending' if no status found
+                statusValue = statusValue || 'Pending';
+                
                 // Normalize status to lowercase and trim any whitespace
-                const status = (activity.status || '').toLowerCase().trim();
+                const status = statusValue.toString().toLowerCase().trim();
                 const statusClass = status === 'complete' ? 'status-complete' : 
                                  status === 'pending' ? 'status-pending' : 'status-overdue';
                 
-                const statusText = activity.status 
-                    ? activity.status.charAt(0).toUpperCase() + activity.status.slice(1).toLowerCase()
-                    : 'Pending';
+                const statusText = statusValue.toString().charAt(0).toUpperCase() + 
+                                  statusValue.toString().slice(1).toLowerCase();
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${activity.subject || 'Unknown'}</td>
-                    <td>${activity.activity || 'Unknown'}</td>
+                    <td>${activity.activity || '-'}</td>
                     <td>${activity.date || '-'}</td>
                     <td>${activity.description || '-'}</td>
                     <td><span class="status-badge ${statusClass}">${statusText}</span></td>
@@ -1777,8 +1797,7 @@
                 document.querySelectorAll('.loading').forEach(loader => {
                     loader.style.display = 'none';
                 });
-                
-                // Update dashboard counts before showing data
+// Update dashboard counts before showing data
                 updateDashboardSummary(data);
                 
                 // Populate all sections with data
