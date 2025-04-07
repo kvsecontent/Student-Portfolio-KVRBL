@@ -1458,114 +1458,78 @@
             });
         }
 
-        // Replace the existing populateSubjectActivities function in your index.html with this updated version
+        // Simplified approach for Subject Activities based on the working Assignment tab solution
+        function populateSubjectActivities(data) {
+            const tbody = document.getElementById('subjectActivitiesTable');
+            tbody.innerHTML = '';
 
-// Populate Subject Activities - UPDATED to fix status display with better field detection
-function populateSubjectActivities(data) {
-    const tbody = document.getElementById('subjectActivitiesTable');
-    tbody.innerHTML = '';
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No subject activities available.</td></tr>';
+                return;
+            }
 
-    if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No subject activities available.</td></tr>';
-        return;
-    }
+            console.log('Activity data structure:', data);
 
-    // Debug: Log the structure of the first activity to understand the data format
-    console.log('Activity data structure:', data[0]);
-
-    data.forEach(activity => {
-        // Extract subject and try to find the right status field based on the subject
-        const subject = activity.subject || '';
-        
-        // Look for status in multiple possible formats
-        let statusValue = null;
-        
-        // Try standard status field first
-        if (activity.status !== undefined) {
-            statusValue = activity.status;
-        } 
-        // Try subject-specific status fields (matching the Google Sheet column naming pattern)
-        else if (subject) {
-            // Try different possible formats for status field names
-            const possibleStatusFields = [
-                // Convert spaces to underscores for field name (e.g., "T W A U" -> "T_W_A_U")
-                `${subject.replace(/\s+/g, '_')}_activity1_status1`,
-                // Try lowercase version
-                `${subject.toLowerCase().replace(/\s+/g, '_')}_activity1_status1`,
-                // Try original subject with spaces
-                `${subject}_activity1_status1`
-            ];
-            
-            // Check each possible field name
-            for (const fieldName of possibleStatusFields) {
-                if (activity[fieldName] !== undefined) {
-                    statusValue = activity[fieldName];
-                    console.log(`Found status in field: ${fieldName} = ${statusValue}`);
-                    break;
+            data.forEach(activity => {
+                // Simply check for field ending with "_status1" in the activity object
+                let statusValue = 'Pending'; // Default value
+                
+                // Loop through all properties of the activity object
+                for (const key in activity) {
+                    // If the key ends with '_status1', use its value for status
+                    if (key.endsWith('_status1') && activity[key]) {
+                        statusValue = activity[key];
+                        break;
+                    }
                 }
-            }
-        }
-        
-        // If still not found, look for any field containing 'status'
-        if (statusValue === null) {
-            for (const key in activity) {
-                if (key.toLowerCase().includes('status')) {
-                    statusValue = activity[key];
-                    console.log(`Found status in generic field: ${key} = ${statusValue}`);
-                    break;
+                
+                // Normalize status to lowercase and trim any whitespace - same approach as assignments
+                const status = (statusValue || '').toLowerCase().trim();
+                const statusClass = status === 'complete' ? 'status-complete' : 
+                                 status === 'pending' ? 'status-pending' : 'status-overdue';
+                
+                // Create proper display text (capitalize first letter)
+                const statusText = statusValue ? 
+                    statusValue.charAt(0).toUpperCase() + statusValue.slice(1).toLowerCase() :
+                    'Pending';
+                
+                // Find the most appropriate activity, date, and description fields
+                let activityName = null;
+                let activityDate = null; 
+                let activityDescription = null;
+                let subject = activity.subject || '';
+                
+                // Loop through all properties
+                for (const key in activity) {
+                    // Activity name
+                    if ((key === 'activity' || key.endsWith('_activity1')) && !activityName) {
+                        activityName = activity[key];
+                    }
+                    // Date
+                    if ((key === 'date' || key.endsWith('_date')) && !activityDate) {
+                        activityDate = activity[key];
+                    }
+                    // Description
+                    if ((key === 'description' || key.endsWith('_description')) && !activityDescription) {
+                        activityDescription = activity[key];
+                    }
+                    // Subject (if not already found)
+                    if (key === 'subject' && !subject) {
+                        subject = activity[key];
+                    }
                 }
-            }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${subject || 'Unknown'}</td>
+                    <td>${activityName || '-'}</td>
+                    <td>${activityDate || '-'}</td>
+                    <td>${activityDescription || '-'}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
         }
-        
-        // Default to 'Pending' if no status found
-        statusValue = statusValue || 'Pending';
-        
-        // Also try to find the activity name, date, and description in a similar way
-        let activityName = activity.activity;
-        let activityDate = activity.date;
-        let activityDescription = activity.description;
-        
-        // If standard fields not found, look for subject-specific fields
-        if (!activityName && subject) {
-            const possibleNameField = `${subject.replace(/\s+/g, '_')}_activity1`;
-            if (activity[possibleNameField]) {
-                activityName = activity[possibleNameField];
-            }
-        }
-        
-        if (!activityDate && subject) {
-            const possibleDateField = `${subject.replace(/\s+/g, '_')}_activity1_date`;
-            if (activity[possibleDateField]) {
-                activityDate = activity[possibleDateField];
-            }
-        }
-        
-        if (!activityDescription && subject) {
-            const possibleDescField = `${subject.replace(/\s+/g, '_')}_activity1_description`;
-            if (activity[possibleDescField]) {
-                activityDescription = activity[possibleDescField];
-            }
-        }
-        
-        // Normalize status to lowercase and trim any whitespace
-        const status = statusValue.toString().toLowerCase().trim();
-        const statusClass = status === 'complete' ? 'status-complete' : 
-                         status === 'pending' ? 'status-pending' : 'status-overdue';
-        
-        const statusText = statusValue.toString().charAt(0).toUpperCase() + 
-                          statusValue.toString().slice(1).toLowerCase();
-        
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${subject || 'Unknown'}</td>
-            <td>${activityName || '-'}</td>
-            <td>${activityDate || '-'}</td>
-            <td>${activityDescription || '-'}</td>
-            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-        `;
-        tbody.appendChild(row);
-    });
-}
 
         // Populate Assignments
         function populateAssignments(data) {
@@ -1854,7 +1818,8 @@ function populateSubjectActivities(data) {
                 document.querySelectorAll('.loading').forEach(loader => {
                     loader.style.display = 'none';
                 });
-// Update dashboard counts before showing data
+                
+                // Update dashboard counts before showing data
                 updateDashboardSummary(data);
                 
                 // Populate all sections with data
@@ -1887,4 +1852,4 @@ function populateSubjectActivities(data) {
         }
     </script>
 </body>
-</html>
+</html>    
