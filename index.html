@@ -1458,57 +1458,114 @@
             });
         }
 
-        // Populate Subject Activities - UPDATED to fix status display
-        function populateSubjectActivities(data) {
-            const tbody = document.getElementById('subjectActivitiesTable');
-            tbody.innerHTML = '';
+        // Replace the existing populateSubjectActivities function in your index.html with this updated version
 
-            if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No subject activities available.</td></tr>';
-                return;
-            }
+// Populate Subject Activities - UPDATED to fix status display with better field detection
+function populateSubjectActivities(data) {
+    const tbody = document.getElementById('subjectActivitiesTable');
+    tbody.innerHTML = '';
 
-            data.forEach(activity => {
-                // First check for standard status field
-                let statusValue = activity.status;
-                
-                // If not found, check for T_W_A_U_activity1_status1 field
-                if (statusValue === undefined) {
-                    if (activity.T_W_A_U_activity1_status1 !== undefined) {
-                        statusValue = activity.T_W_A_U_activity1_status1;
-                    } else {
-                        // If still not found, look for any field containing 'status'
-                        for (const key in activity) {
-                            if (key.toLowerCase().includes('status')) {
-                                statusValue = activity[key];
-                                break;
-                            }
-                        }
-                    }
+    if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No subject activities available.</td></tr>';
+        return;
+    }
+
+    // Debug: Log the structure of the first activity to understand the data format
+    console.log('Activity data structure:', data[0]);
+
+    data.forEach(activity => {
+        // Extract subject and try to find the right status field based on the subject
+        const subject = activity.subject || '';
+        
+        // Look for status in multiple possible formats
+        let statusValue = null;
+        
+        // Try standard status field first
+        if (activity.status !== undefined) {
+            statusValue = activity.status;
+        } 
+        // Try subject-specific status fields (matching the Google Sheet column naming pattern)
+        else if (subject) {
+            // Try different possible formats for status field names
+            const possibleStatusFields = [
+                // Convert spaces to underscores for field name (e.g., "T W A U" -> "T_W_A_U")
+                `${subject.replace(/\s+/g, '_')}_activity1_status1`,
+                // Try lowercase version
+                `${subject.toLowerCase().replace(/\s+/g, '_')}_activity1_status1`,
+                // Try original subject with spaces
+                `${subject}_activity1_status1`
+            ];
+            
+            // Check each possible field name
+            for (const fieldName of possibleStatusFields) {
+                if (activity[fieldName] !== undefined) {
+                    statusValue = activity[fieldName];
+                    console.log(`Found status in field: ${fieldName} = ${statusValue}`);
+                    break;
                 }
-                
-                // Default to 'Pending' if no status found
-                statusValue = statusValue || 'Pending';
-                
-                // Normalize status to lowercase and trim any whitespace
-                const status = statusValue.toString().toLowerCase().trim();
-                const statusClass = status === 'complete' ? 'status-complete' : 
-                                 status === 'pending' ? 'status-pending' : 'status-overdue';
-                
-                const statusText = statusValue.toString().charAt(0).toUpperCase() + 
-                                  statusValue.toString().slice(1).toLowerCase();
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${activity.subject || 'Unknown'}</td>
-                    <td>${activity.activity || '-'}</td>
-                    <td>${activity.date || '-'}</td>
-                    <td>${activity.description || '-'}</td>
-                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                `;
-                tbody.appendChild(row);
-            });
+            }
         }
+        
+        // If still not found, look for any field containing 'status'
+        if (statusValue === null) {
+            for (const key in activity) {
+                if (key.toLowerCase().includes('status')) {
+                    statusValue = activity[key];
+                    console.log(`Found status in generic field: ${key} = ${statusValue}`);
+                    break;
+                }
+            }
+        }
+        
+        // Default to 'Pending' if no status found
+        statusValue = statusValue || 'Pending';
+        
+        // Also try to find the activity name, date, and description in a similar way
+        let activityName = activity.activity;
+        let activityDate = activity.date;
+        let activityDescription = activity.description;
+        
+        // If standard fields not found, look for subject-specific fields
+        if (!activityName && subject) {
+            const possibleNameField = `${subject.replace(/\s+/g, '_')}_activity1`;
+            if (activity[possibleNameField]) {
+                activityName = activity[possibleNameField];
+            }
+        }
+        
+        if (!activityDate && subject) {
+            const possibleDateField = `${subject.replace(/\s+/g, '_')}_activity1_date`;
+            if (activity[possibleDateField]) {
+                activityDate = activity[possibleDateField];
+            }
+        }
+        
+        if (!activityDescription && subject) {
+            const possibleDescField = `${subject.replace(/\s+/g, '_')}_activity1_description`;
+            if (activity[possibleDescField]) {
+                activityDescription = activity[possibleDescField];
+            }
+        }
+        
+        // Normalize status to lowercase and trim any whitespace
+        const status = statusValue.toString().toLowerCase().trim();
+        const statusClass = status === 'complete' ? 'status-complete' : 
+                         status === 'pending' ? 'status-pending' : 'status-overdue';
+        
+        const statusText = statusValue.toString().charAt(0).toUpperCase() + 
+                          statusValue.toString().slice(1).toLowerCase();
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${subject || 'Unknown'}</td>
+            <td>${activityName || '-'}</td>
+            <td>${activityDate || '-'}</td>
+            <td>${activityDescription || '-'}</td>
+            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+        `;
+        tbody.appendChild(row);
+    });
+}
 
         // Populate Assignments
         function populateAssignments(data) {
