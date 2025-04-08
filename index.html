@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Portfolio | PM SHRI KENDRIYA VIDYALAYA RAEBARELI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- CSS styles remain unchanged -->
     <style>
         :root {
             --primary: #1e40af;
@@ -1197,9 +1196,6 @@
                     console.log('Subject Activities Data:', data.subjectActivities);
                 }
                 
-                // Normalize status values across all activities for consistency
-                normalizeDataStatusValues(data);
-                
                 // Validate data structure
                 validateDataStructure(data);
                 
@@ -1236,65 +1232,6 @@
                     attendance: []
                 };
             }
-        }
-        
-        // NEW: Normalize status values throughout the data
-        function normalizeDataStatusValues(data) {
-            if (!data) return;
-            
-            // Create a helper function to standardize status values
-            const normalizeStatusValue = function(status) {
-                if (!status) return "Pending"; // Default to Pending for empty/null values
-                
-                // Convert to string and clean up
-                const cleanStatus = String(status).trim();
-                
-                // Handle various forms of Complete
-                if (/^complete$/i.test(cleanStatus) || 
-                    /^completed$/i.test(cleanStatus) || 
-                    /^complet/i.test(cleanStatus) || 
-                    cleanStatus.toLowerCase() === 'done' || 
-                    cleanStatus.toLowerCase() === 'finished') {
-                    return "Complete";
-                }
-                
-                // Handle various forms of Pending
-                if (/^pending$/i.test(cleanStatus) || 
-                    /^pend/i.test(cleanStatus) || 
-                    cleanStatus.toLowerCase() === 'ongoing' || 
-                    cleanStatus.toLowerCase() === 'in progress') {
-                    return "Pending";
-                }
-                
-                // Handle various forms of Overdue
-                if (/overdue/i.test(cleanStatus) || 
-                    /due/i.test(cleanStatus) || 
-                    /late/i.test(cleanStatus) || 
-                    /missed/i.test(cleanStatus)) {
-                    return "Overdue";
-                }
-                
-                // If we can't classify it, capitalize first letter
-                return cleanStatus.charAt(0).toUpperCase() + cleanStatus.slice(1).toLowerCase();
-            };
-            
-            // Normalize subject activities
-            if (data.subjectActivities && Array.isArray(data.subjectActivities)) {
-                data.subjectActivities.forEach(activity => {
-                    console.log(`Normalizing activity status: "${activity.status}" for ${activity.subject}`);
-                    activity.status = normalizeStatusValue(activity.status);
-                    console.log(`Normalized to: "${activity.status}"`);
-                });
-            }
-            
-            // Normalize assignments
-            if (data.assignments && Array.isArray(data.assignments)) {
-                data.assignments.forEach(assignment => {
-                    assignment.status = normalizeStatusValue(assignment.status);
-                });
-            }
-            
-            return data;
         }
         
         // Validate data structure to ensure it matches frontend expectations
@@ -1402,11 +1339,11 @@
             
             // Get completed and pending assignment counts directly from the assignments array
             const completedAssignments = Array.isArray(data.assignments) 
-                ? data.assignments.filter(a => a.status === 'Complete').length
+                ? data.assignments.filter(a => (a.status || '').toLowerCase().trim() === 'complete').length
                 : 0;
                 
             const pendingAssignments = Array.isArray(data.assignments)
-                ? data.assignments.filter(a => a.status === 'Pending').length
+                ? data.assignments.filter(a => (a.status || '').toLowerCase().trim() === 'pending').length
                 : 0;
             
             // Get total unique subjects from assignments
@@ -1516,7 +1453,7 @@
             });
         }
 
-        // Populate Subject Activities - IMPROVED VERSION
+        // Populate Subject Activities - FIXED: Using same approach as assignments
         function populateSubjectActivities(data) {
             const tbody = document.getElementById('subjectActivitiesTable');
             tbody.innerHTML = '';
@@ -1528,21 +1465,21 @@
 
             console.log('Populating subject activities with data:', data);
 
-            data.forEach((activity, index) => {
-                // Determine status class based on the normalized status value
-                let statusClass = 'status-pending'; // Default class
+            data.forEach(activity => {
+                // Use the exact same approach as assignments function
+                // Normalize status to lowercase and trim any whitespace
+                const status = (activity.status || '').toLowerCase().trim();
                 
-                if (activity.status === 'Complete') {
-                    statusClass = 'status-complete';
-                } else if (activity.status === 'Overdue') {
-                    statusClass = 'status-overdue';
-                }
+                // Simple direct comparison, exactly like the assignments function
+                const statusClass = status === 'complete' ? 'status-complete' : 
+                               status === 'pending' ? 'status-pending' : 'status-overdue';
                 
-                // The display text will be the normalized status value
-                const statusText = activity.status;
+                // Use the original status text with proper capitalization for display
+                const statusText = activity.status 
+                    ? activity.status.charAt(0).toUpperCase() + activity.status.slice(1).toLowerCase()
+                    : 'Pending';
                 
-                // Debug for every activity
-                console.log(`Activity ${index}: ${activity.subject} - ${activity.activity} - Status: "${activity.status}" - Class: "${statusClass}"`);
+                console.log(`Activity: ${activity.subject}, Status: "${activity.status}", Processed: "${status}", Class: "${statusClass}"`);
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -1567,14 +1504,14 @@
             }
 
             data.forEach(assignment => {
-                // Determine status class based on the normalized status value
-                let statusClass = 'status-pending'; // Default class
+                // Normalize status to lowercase and trim any whitespace
+                const status = (assignment.status || '').toLowerCase().trim();
+                const statusClass = status === 'complete' ? 'status-complete' : 
+                                 status === 'pending' ? 'status-pending' : 'status-overdue';
                 
-                if (assignment.status === 'Complete') {
-                    statusClass = 'status-complete';
-                } else if (assignment.status === 'Overdue') {
-                    statusClass = 'status-overdue';
-                }
+                const statusText = assignment.status 
+                    ? assignment.status.charAt(0).toUpperCase() + assignment.status.slice(1).toLowerCase()
+                    : 'Pending';
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -1582,7 +1519,7 @@
                     <td>${assignment.name || 'Unknown'}</td>
                     <td>${assignment.assignedDate || '-'}</td>
                     <td>${assignment.dueDate || '-'}</td>
-                    <td><span class="status-badge ${statusClass}">${assignment.status}</span></td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                     <td>${assignment.remarks || '-'}</td>
                 `;
                 tbody.appendChild(row);
@@ -1692,7 +1629,7 @@
             updateFilterOptions('correctionSubjectFilter', subjects);
             updateFilterOptions('attendanceMonthFilter', months);
             
-            // Subject filter for activities
+            // Subject filter for activities - uses same approach for consistency
             document.getElementById('subjectFilter').addEventListener('change', e => {
                 const selectedSubject = e.target.value;
                 let filteredData = data.subjectActivities || [];
@@ -1711,7 +1648,7 @@
                 
                 if (selectedStatus !== 'all' && filteredData.length > 0) {
                     filteredData = filteredData.filter(assignment => 
-                        assignment.status.toLowerCase() === selectedStatus.toLowerCase());
+                        (assignment.status || '').toLowerCase().trim() === selectedStatus);
                 }
                 
                 populateAssignments(filteredData);
