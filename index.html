@@ -1468,15 +1468,51 @@
                 return;
             }
 
+            console.log('Populating subject activities:', data);
+
             data.forEach(activity => {
-                // Normalize status to lowercase and trim any whitespace
-                const status = (activity.status || '').toLowerCase().trim();
-                const statusClass = status === 'complete' ? 'status-complete' : 
-                                 status === 'pending' ? 'status-pending' : 'status-overdue';
+                // Force string conversion and handle null/undefined
+                const rawStatus = String(activity.status || '').trim();
+                console.log(`Activity: ${activity.subject}, Raw status: "${rawStatus}"`);
                 
-                const statusText = activity.status 
-                    ? activity.status.charAt(0).toUpperCase() + activity.status.slice(1).toLowerCase()
-                    : 'Pending';
+                // Normalize to lowercase for comparison
+                const normalizedStatus = rawStatus.toLowerCase();
+                
+                // Check for any variant of "complete" or "completed"
+                const isComplete = normalizedStatus === 'complete' || 
+                                  normalizedStatus === 'completed' || 
+                                  normalizedStatus.includes('complet') ||
+                                  normalizedStatus === 'done' ||
+                                  normalizedStatus === 'finished';
+                
+                // Check for any variant of "pending"
+                const isPending = normalizedStatus === 'pending' || 
+                                 normalizedStatus.includes('pend') ||
+                                 normalizedStatus === 'ongoing' ||
+                                 normalizedStatus === 'in progress';
+                
+                // Determine status class based on more flexible matching
+                let statusClass = 'status-pending'; // Default to pending
+                if (isComplete) {
+                    statusClass = 'status-complete';
+                } else if (normalizedStatus.includes('over') || normalizedStatus.includes('due')) {
+                    statusClass = 'status-overdue';
+                }
+                
+                // Normalize the displayed status text
+                let statusText = 'Pending'; // Default
+                if (isComplete) {
+                    statusText = 'Complete';
+                } else if (normalizedStatus.includes('over') || normalizedStatus.includes('due')) {
+                    statusText = 'Overdue';
+                } else if (isPending) {
+                    statusText = 'Pending';
+                } else if (rawStatus) {
+                    // If we can't categorize it, just display the original with first letter capitalized
+                    statusText = rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
+                }
+                
+                console.log(`Final status class: ${statusClass}, Final status text: ${statusText}`);
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -1630,6 +1666,19 @@
             document.getElementById('subjectFilter').addEventListener('change', e => {
                 const selectedSubject = e.target.value;
                 let filteredData = data.subjectActivities || [];
+                
+                // Process status for each activity before filtering
+                filteredData = filteredData.map(activity => {
+                    // Make a copy to avoid mutation
+                    const processedActivity = {...activity};
+                    // Process status to ensure "Complete" is recognized
+                    if (processedActivity.status && 
+                        (String(processedActivity.status).toLowerCase().includes('complete') || 
+                         String(processedActivity.status).toLowerCase().includes('complet'))) {
+                        processedActivity.status = 'Complete';
+                    }
+                    return processedActivity;
+                });
                 
                 if (selectedSubject !== 'all' && filteredData.length > 0) {
                     filteredData = filteredData.filter(activity => activity.subject === selectedSubject);
@@ -1786,10 +1835,18 @@
                     populateStudentInfo(data.studentInfo);
                 }
                 
-                // We're no longer using the API's summary values
-                // if (data.summary) {
-                //     populateSummary(data.summary);
-                // }
+                // Fix for subject activities status issue
+                // Make sure all status values are correctly processed
+                if (data.subjectActivities && Array.isArray(data.subjectActivities)) {
+                    data.subjectActivities.forEach(activity => {
+                        // Ensure status is properly set to detect "Complete"
+                        if (activity.status && 
+                            (String(activity.status).toLowerCase().includes('complete') || 
+                             String(activity.status).toLowerCase().includes('complet'))) {
+                            activity.status = 'Complete'; // Standardize complete statuses
+                        }
+                    });
+                }
                 
                 populateSubjectProgress(data.subjectProgress || []);
                 populateRecentTests(data.recentTests || []);
