@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Portfolio | PM SHRI KENDRIYA VIDYALAYA RAEBARELI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CSS styles remain unchanged -->
     <style>
         :root {
             --primary: #1e40af;
@@ -1191,6 +1192,14 @@
                 const data = await dataResponse.json();
                 console.log('Successfully received data:', data);
                 
+                // Log subject activities for debugging
+                if (data.subjectActivities && Array.isArray(data.subjectActivities)) {
+                    console.log('Subject Activities Data:', data.subjectActivities);
+                }
+                
+                // Normalize status values across all activities for consistency
+                normalizeDataStatusValues(data);
+                
                 // Validate data structure
                 validateDataStructure(data);
                 
@@ -1227,6 +1236,65 @@
                     attendance: []
                 };
             }
+        }
+        
+        // NEW: Normalize status values throughout the data
+        function normalizeDataStatusValues(data) {
+            if (!data) return;
+            
+            // Create a helper function to standardize status values
+            const normalizeStatusValue = function(status) {
+                if (!status) return "Pending"; // Default to Pending for empty/null values
+                
+                // Convert to string and clean up
+                const cleanStatus = String(status).trim();
+                
+                // Handle various forms of Complete
+                if (/^complete$/i.test(cleanStatus) || 
+                    /^completed$/i.test(cleanStatus) || 
+                    /^complet/i.test(cleanStatus) || 
+                    cleanStatus.toLowerCase() === 'done' || 
+                    cleanStatus.toLowerCase() === 'finished') {
+                    return "Complete";
+                }
+                
+                // Handle various forms of Pending
+                if (/^pending$/i.test(cleanStatus) || 
+                    /^pend/i.test(cleanStatus) || 
+                    cleanStatus.toLowerCase() === 'ongoing' || 
+                    cleanStatus.toLowerCase() === 'in progress') {
+                    return "Pending";
+                }
+                
+                // Handle various forms of Overdue
+                if (/overdue/i.test(cleanStatus) || 
+                    /due/i.test(cleanStatus) || 
+                    /late/i.test(cleanStatus) || 
+                    /missed/i.test(cleanStatus)) {
+                    return "Overdue";
+                }
+                
+                // If we can't classify it, capitalize first letter
+                return cleanStatus.charAt(0).toUpperCase() + cleanStatus.slice(1).toLowerCase();
+            };
+            
+            // Normalize subject activities
+            if (data.subjectActivities && Array.isArray(data.subjectActivities)) {
+                data.subjectActivities.forEach(activity => {
+                    console.log(`Normalizing activity status: "${activity.status}" for ${activity.subject}`);
+                    activity.status = normalizeStatusValue(activity.status);
+                    console.log(`Normalized to: "${activity.status}"`);
+                });
+            }
+            
+            // Normalize assignments
+            if (data.assignments && Array.isArray(data.assignments)) {
+                data.assignments.forEach(assignment => {
+                    assignment.status = normalizeStatusValue(assignment.status);
+                });
+            }
+            
+            return data;
         }
         
         // Validate data structure to ensure it matches frontend expectations
@@ -1328,17 +1396,17 @@
             }
         }
 
-        // NEW FUNCTION: Calculate and update dashboard summary directly 
+        // Calculate and update dashboard summary
         function updateDashboardSummary(data) {
             console.log('Updating dashboard summary with latest counts');
             
             // Get completed and pending assignment counts directly from the assignments array
             const completedAssignments = Array.isArray(data.assignments) 
-                ? data.assignments.filter(a => (a.status || '').toLowerCase().trim() === 'complete').length
+                ? data.assignments.filter(a => a.status === 'Complete').length
                 : 0;
                 
             const pendingAssignments = Array.isArray(data.assignments)
-                ? data.assignments.filter(a => (a.status || '').toLowerCase().trim() === 'pending').length
+                ? data.assignments.filter(a => a.status === 'Pending').length
                 : 0;
             
             // Get total unique subjects from assignments
@@ -1381,16 +1449,6 @@
             data.summary.attendancePercentage = attendancePercentage;
             
             console.log(`Dashboard updated: ${uniqueSubjects.size} subjects, ${completedAssignments} completed assignments, ${pendingAssignments} pending assignments`);
-        }
-
-        // Legacy function - not used anymore
-        function populateSummary(data) {
-            if (!data) return;
-            
-            document.getElementById('totalSubjects').textContent = data.totalSubjects || '0';
-            document.getElementById('completedAssignments').textContent = data.completedAssignments || '0';
-            document.getElementById('pendingAssignments').textContent = data.pendingAssignments || '0';
-            document.getElementById('attendancePercentage').textContent = data.attendancePercentage || '0.0%';
         }
 
         // Populate Subject Progress Cards
@@ -1458,7 +1516,7 @@
             });
         }
 
-        // Populate Subject Activities
+        // Populate Subject Activities - IMPROVED VERSION
         function populateSubjectActivities(data) {
             const tbody = document.getElementById('subjectActivitiesTable');
             tbody.innerHTML = '';
@@ -1468,51 +1526,23 @@
                 return;
             }
 
-            console.log('Populating subject activities:', data);
+            console.log('Populating subject activities with data:', data);
 
-            data.forEach(activity => {
-                // Force string conversion and handle null/undefined
-                const rawStatus = String(activity.status || '').trim();
-                console.log(`Activity: ${activity.subject}, Raw status: "${rawStatus}"`);
+            data.forEach((activity, index) => {
+                // Determine status class based on the normalized status value
+                let statusClass = 'status-pending'; // Default class
                 
-                // Normalize to lowercase for comparison
-                const normalizedStatus = rawStatus.toLowerCase();
-                
-                // Check for any variant of "complete" or "completed"
-                const isComplete = normalizedStatus === 'complete' || 
-                                  normalizedStatus === 'completed' || 
-                                  normalizedStatus.includes('complet') ||
-                                  normalizedStatus === 'done' ||
-                                  normalizedStatus === 'finished';
-                
-                // Check for any variant of "pending"
-                const isPending = normalizedStatus === 'pending' || 
-                                 normalizedStatus.includes('pend') ||
-                                 normalizedStatus === 'ongoing' ||
-                                 normalizedStatus === 'in progress';
-                
-                // Determine status class based on more flexible matching
-                let statusClass = 'status-pending'; // Default to pending
-                if (isComplete) {
+                if (activity.status === 'Complete') {
                     statusClass = 'status-complete';
-                } else if (normalizedStatus.includes('over') || normalizedStatus.includes('due')) {
+                } else if (activity.status === 'Overdue') {
                     statusClass = 'status-overdue';
                 }
                 
-                // Normalize the displayed status text
-                let statusText = 'Pending'; // Default
-                if (isComplete) {
-                    statusText = 'Complete';
-                } else if (normalizedStatus.includes('over') || normalizedStatus.includes('due')) {
-                    statusText = 'Overdue';
-                } else if (isPending) {
-                    statusText = 'Pending';
-                } else if (rawStatus) {
-                    // If we can't categorize it, just display the original with first letter capitalized
-                    statusText = rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
-                }
+                // The display text will be the normalized status value
+                const statusText = activity.status;
                 
-                console.log(`Final status class: ${statusClass}, Final status text: ${statusText}`);
+                // Debug for every activity
+                console.log(`Activity ${index}: ${activity.subject} - ${activity.activity} - Status: "${activity.status}" - Class: "${statusClass}"`);
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -1537,14 +1567,14 @@
             }
 
             data.forEach(assignment => {
-                // Normalize status to lowercase and trim any whitespace
-                const status = (assignment.status || '').toLowerCase().trim();
-                const statusClass = status === 'complete' ? 'status-complete' : 
-                                 status === 'pending' ? 'status-pending' : 'status-overdue';
+                // Determine status class based on the normalized status value
+                let statusClass = 'status-pending'; // Default class
                 
-                const statusText = assignment.status 
-                    ? assignment.status.charAt(0).toUpperCase() + assignment.status.slice(1).toLowerCase()
-                    : 'Pending';
+                if (assignment.status === 'Complete') {
+                    statusClass = 'status-complete';
+                } else if (assignment.status === 'Overdue') {
+                    statusClass = 'status-overdue';
+                }
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -1552,7 +1582,7 @@
                     <td>${assignment.name || 'Unknown'}</td>
                     <td>${assignment.assignedDate || '-'}</td>
                     <td>${assignment.dueDate || '-'}</td>
-                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td><span class="status-badge ${statusClass}">${assignment.status}</span></td>
                     <td>${assignment.remarks || '-'}</td>
                 `;
                 tbody.appendChild(row);
@@ -1667,19 +1697,6 @@
                 const selectedSubject = e.target.value;
                 let filteredData = data.subjectActivities || [];
                 
-                // Process status for each activity before filtering
-                filteredData = filteredData.map(activity => {
-                    // Make a copy to avoid mutation
-                    const processedActivity = {...activity};
-                    // Process status to ensure "Complete" is recognized
-                    if (processedActivity.status && 
-                        (String(processedActivity.status).toLowerCase().includes('complete') || 
-                         String(processedActivity.status).toLowerCase().includes('complet'))) {
-                        processedActivity.status = 'Complete';
-                    }
-                    return processedActivity;
-                });
-                
                 if (selectedSubject !== 'all' && filteredData.length > 0) {
                     filteredData = filteredData.filter(activity => activity.subject === selectedSubject);
                 }
@@ -1694,7 +1711,7 @@
                 
                 if (selectedStatus !== 'all' && filteredData.length > 0) {
                     filteredData = filteredData.filter(assignment => 
-                        (assignment.status || '').toLowerCase().trim() === selectedStatus);
+                        assignment.status.toLowerCase() === selectedStatus.toLowerCase());
                 }
                 
                 populateAssignments(filteredData);
@@ -1833,19 +1850,6 @@
                 // Populate all sections with data
                 if (data.studentInfo) {
                     populateStudentInfo(data.studentInfo);
-                }
-                
-                // Fix for subject activities status issue
-                // Make sure all status values are correctly processed
-                if (data.subjectActivities && Array.isArray(data.subjectActivities)) {
-                    data.subjectActivities.forEach(activity => {
-                        // Ensure status is properly set to detect "Complete"
-                        if (activity.status && 
-                            (String(activity.status).toLowerCase().includes('complete') || 
-                             String(activity.status).toLowerCase().includes('complet'))) {
-                            activity.status = 'Complete'; // Standardize complete statuses
-                        }
-                    });
                 }
                 
                 populateSubjectProgress(data.subjectProgress || []);
