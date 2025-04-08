@@ -1194,6 +1194,10 @@
                 // Log subject activities for debugging
                 if (data.subjectActivities && Array.isArray(data.subjectActivities)) {
                     console.log('Subject Activities Data:', data.subjectActivities);
+                    // Debug log to see all properties for each activity
+                    data.subjectActivities.forEach((activity, index) => {
+                        console.log(`Activity ${index} keys:`, Object.keys(activity));
+                    });
                 }
                 
                 // Validate data structure
@@ -1453,7 +1457,27 @@
             });
         }
 
-        // Populate Subject Activities - FIXED: Using same approach as assignments
+        // Find the status value from any status property in the activity object
+        function findActivityStatus(activity) {
+            // Check if there's a direct status property
+            if (activity.status) {
+                console.log(`Found direct status property: ${activity.status}`);
+                return activity.status;
+            }
+            
+            // Look for properties that end with 'status' or 'status1', 'status2', etc.
+            for (const key in activity) {
+                if (key.toLowerCase().endsWith('status') || /status\d+$/i.test(key)) {
+                    console.log(`Found status in property ${key}: ${activity[key]}`);
+                    return activity[key];
+                }
+            }
+            
+            console.log('No status property found, defaulting to "Pending"');
+            return 'Pending'; // Default if no status is found
+        }
+
+        // Populate Subject Activities - FIXED: Now checking any status1, status2 fields
         function populateSubjectActivities(data) {
             const tbody = document.getElementById('subjectActivitiesTable');
             tbody.innerHTML = '';
@@ -1466,20 +1490,27 @@
             console.log('Populating subject activities with data:', data);
 
             data.forEach(activity => {
-                // Use the exact same approach as assignments function
-                // Normalize status to lowercase and trim any whitespace
-                const status = (activity.status || '').toLowerCase().trim();
+                // Debug: Log all keys to find status fields
+                console.log(`Activity keys for ${activity.subject || 'unknown'}:`, Object.keys(activity));
+                
+                // Find any property that might contain status
+                const statusValue = findActivityStatus(activity);
+                console.log(`Found status value: "${statusValue}"`);
+                
+                // Normalize the found status
+                const status = (statusValue || '').toLowerCase().trim();
+                console.log(`Normalized status: "${status}"`);
                 
                 // Simple direct comparison, exactly like the assignments function
                 const statusClass = status === 'complete' ? 'status-complete' : 
                                status === 'pending' ? 'status-pending' : 'status-overdue';
                 
                 // Use the original status text with proper capitalization for display
-                const statusText = activity.status 
-                    ? activity.status.charAt(0).toUpperCase() + activity.status.slice(1).toLowerCase()
+                const statusText = statusValue 
+                    ? statusValue.charAt(0).toUpperCase() + statusValue.slice(1).toLowerCase()
                     : 'Pending';
                 
-                console.log(`Activity: ${activity.subject}, Status: "${activity.status}", Processed: "${status}", Class: "${statusClass}"`);
+                console.log(`Final status for ${activity.subject}: class=${statusClass}, text=${statusText}`);
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
