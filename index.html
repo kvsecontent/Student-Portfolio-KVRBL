@@ -424,7 +424,7 @@
             display: inline-block;
         }
 
-        .status-complete {
+        .status-complete, .status-resolved {
             background-color: rgba(16, 185, 129, 0.1);
             color: var(--success);
         }
@@ -434,7 +434,7 @@
             color: var(--warning);
         }
 
-        .status-overdue {
+        .status-overdue, .status-escalated {
             background-color: rgba(239, 68, 68, 0.1);
             color: var(--danger);
         }
@@ -462,6 +462,16 @@
         }
 
         .grade-d {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        /* Discipline Points */
+        .points-badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 12px;
             background-color: rgba(239, 68, 68, 0.1);
             color: var(--danger);
         }
@@ -791,6 +801,7 @@
                 <div class="nav-tab" data-tab="tests">Tests & Assessments</div>
                 <div class="nav-tab" data-tab="corrections">Copy Corrections</div>
                 <div class="nav-tab" data-tab="attendance">Attendance</div>
+                <div class="nav-tab" data-tab="discipline">Discipline</div>
             </div>
 
             <!-- Dashboard Section -->
@@ -1042,6 +1053,48 @@
                     </table>
                 </div>
             </section>
+
+            <!-- Discipline Section -->
+            <section class="content-section" id="discipline">
+                <div class="section-header">
+                    <h2 class="section-title">Discipline Record</h2>
+                    <div class="section-actions">
+                        <select class="filter-dropdown" id="disciplineTypeFilter">
+                            <option value="all">All Types</option>
+                        </select>
+                        <select class="filter-dropdown" id="disciplineStatusFilter">
+                            <option value="all">All Status</option>
+                            <option value="resolved">Resolved</option>
+                            <option value="pending">Pending</option>
+                            <option value="escalated">Escalated</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Action Taken</th>
+                                <th>Teacher</th>
+                                <th>Status</th>
+                                <th>Points</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="disciplineTable">
+                            <!-- Will be populated by JavaScript -->
+                            <tr>
+                                <td colspan="8" class="loading">
+                                    <div class="spinner"></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
         </main>
 
         <footer>
@@ -1233,7 +1286,8 @@
                     assignments: [],
                     tests: [],
                     corrections: [],
-                    attendance: []
+                    attendance: [],
+                    discipline: [] // Add empty discipline array
                 };
             }
         }
@@ -1291,6 +1345,12 @@
             if (!Array.isArray(data.attendance)) {
                 console.warn('attendance is not an array');
                 data.attendance = [];
+            }
+            
+            // Add validation for discipline records
+            if (!Array.isArray(data.discipline)) {
+                console.warn('discipline is not an array');
+                data.discipline = [];
             }
             
             // Check summary object
@@ -1646,6 +1706,77 @@
             });
         }
 
+        // Find discipline status from any status property
+        function findDisciplineStatus(item) {
+            // Check for direct status property
+            if (item.status) {
+                return item.status;
+            }
+            
+            // Look for properties that end with 'status' or 'status1', 'status2', etc.
+            for (const key in item) {
+                if (key.toLowerCase().endsWith('status') || /status\d+$/i.test(key)) {
+                    return item[key];
+                }
+            }
+            
+            return 'Pending'; // Default if no status is found
+        }
+
+        // Populate Discipline Records - NEW
+        function populateDiscipline(data) {
+            const tbody = document.getElementById('disciplineTable');
+            tbody.innerHTML = '';
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No discipline records available.</td></tr>';
+                return;
+            }
+
+            console.log('Populating discipline data:', data);
+
+            data.forEach(item => {
+                // Find status from potential multiple fields
+                const statusValue = findDisciplineStatus(item);
+                const status = (statusValue || '').toLowerCase().trim();
+                
+                // Determine status class based on value
+                let statusClass;
+                if (status === 'resolved') {
+                    statusClass = 'status-resolved';
+                } else if (status === 'pending') {
+                    statusClass = 'status-pending';
+                } else if (status === 'escalated') {
+                    statusClass = 'status-escalated';
+                } else {
+                    statusClass = 'status-pending'; // Default
+                }
+                
+                // Format the status text with proper capitalization
+                const statusText = statusValue
+                    ? statusValue.charAt(0).toUpperCase() + statusValue.slice(1).toLowerCase()
+                    : 'Pending';
+                
+                // Format points with badge if present
+                const pointsDisplay = item.points 
+                    ? `<span class="points-badge">-${item.points}</span>` 
+                    : '-';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.date || '-'}</td>
+                    <td>${item.type || '-'}</td>
+                    <td>${item.description || '-'}</td>
+                    <td>${item.action || '-'}</td>
+                    <td>${item.teacher || '-'}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>${pointsDisplay}</td>
+                    <td>${item.remarks || '-'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
         // Filter handlers - Updated for better error handling with empty arrays
         function setupFilters(data) {
             // Get unique subjects from all data
@@ -1654,11 +1785,15 @@
             // Also get unique months for attendance filter
             const months = getUniqueMonths(data.attendance);
             
+            // Get unique discipline types
+            const disciplineTypes = getUniqueDisciplineTypes(data.discipline);
+            
             // Update filter dropdowns
             updateFilterOptions('subjectFilter', subjects);
             updateFilterOptions('testSubjectFilter', subjects);
             updateFilterOptions('correctionSubjectFilter', subjects);
             updateFilterOptions('attendanceMonthFilter', months);
+            updateFilterOptions('disciplineTypeFilter', disciplineTypes);
             
             // Subject filter for activities - uses same approach for consistency
             document.getElementById('subjectFilter').addEventListener('change', e => {
@@ -1720,6 +1855,39 @@
                 
                 populateAttendance(filteredData);
             });
+            
+            // Discipline type filter
+            document.getElementById('disciplineTypeFilter').addEventListener('change', e => {
+                applyDisciplineFilters(data);
+            });
+            
+            // Discipline status filter
+            document.getElementById('disciplineStatusFilter').addEventListener('change', e => {
+                applyDisciplineFilters(data);
+            });
+        }
+        
+        // Apply both discipline filters together
+        function applyDisciplineFilters(data) {
+            const selectedType = document.getElementById('disciplineTypeFilter').value;
+            const selectedStatus = document.getElementById('disciplineStatusFilter').value;
+            
+            let filteredData = data.discipline || [];
+            
+            // Apply type filter
+            if (selectedType !== 'all' && filteredData.length > 0) {
+                filteredData = filteredData.filter(item => item.type === selectedType);
+            }
+            
+            // Apply status filter
+            if (selectedStatus !== 'all' && filteredData.length > 0) {
+                filteredData = filteredData.filter(item => {
+                    const status = findDisciplineStatus(item);
+                    return (status || '').toLowerCase().trim() === selectedStatus;
+                });
+            }
+            
+            populateDiscipline(filteredData);
         }
         
         // Helper function to get unique subjects across all data
@@ -1770,6 +1938,18 @@
             });
             
             return Array.from(months).sort();
+        }
+        
+        // Helper function to get unique discipline types
+        function getUniqueDisciplineTypes(disciplineData) {
+            if (!disciplineData || !Array.isArray(disciplineData)) return [];
+            
+            const types = new Set();
+            disciplineData.forEach(item => {
+                if (item && item.type) types.add(item.type);
+            });
+            
+            return Array.from(types).sort();
         }
         
         // Helper function to update filter dropdown options
@@ -1827,6 +2007,7 @@
                 populateTests(data.tests || []);
                 populateCorrections(data.corrections || []);
                 populateAttendance(data.attendance || []);
+                populateDiscipline(data.discipline || []); // New discipline table
                 
                 // Setup filters
                 setupFilters(data);
