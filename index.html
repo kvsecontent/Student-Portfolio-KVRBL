@@ -1537,7 +1537,7 @@
             return 'Pending'; // Default if no status is found
         }
 
-     // Function to handle HTML links stored as text in description
+    // Enhanced function to handle HTML links and Google Drive links with friendly names
 function makeLinksClickable(text) {
     if (!text || text === '-') return text;
     
@@ -1551,7 +1551,33 @@ function makeLinksClickable(text) {
         });
     }
     
-    // For plain URLs
+    // Special handling for Google Drive links
+    const driveRegex = /(https:\/\/drive\.google\.com\/[^\s]+)/g;
+    if (driveRegex.test(text)) {
+        return text.replace(driveRegex, url => {
+            // Extract filename or give a default name
+            let linkText = "View Google Drive File";
+            
+            // Try to extract a better name from the URL if possible
+            if (url.includes('/file/d/')) {
+                // For direct file links, use a friendly title
+                linkText = "Open Document";
+            } else if (url.includes('/folder/')) {
+                // For folder links
+                linkText = "Open Folder";
+            } else if (url.includes('spreadsheets')) {
+                linkText = "Open Spreadsheet";
+            } else if (url.includes('document')) {
+                linkText = "Open Document";
+            } else if (url.includes('presentation')) {
+                linkText = "Open Presentation";
+            }
+            
+            return `<a href="${url}" target="_blank">${linkText}</a>`;
+        });
+    }
+    
+    // For regular URLs
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     if (urlRegex.test(text)) {
         return text.replace(urlRegex, url => `<a href="${url}" target="_blank">${url}</a>`);
