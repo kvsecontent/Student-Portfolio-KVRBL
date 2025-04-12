@@ -1537,50 +1537,40 @@
             return 'Pending'; // Default if no status is found
         }
 
-    // Enhanced function to handle HTML links and Google Drive links with friendly names
+   // Enhanced function to handle links with custom display names
 function makeLinksClickable(text) {
     if (!text || text === '-') return text;
     
-    // First check if this contains HTML links
+    // Check for HTML links
     const htmlLinkRegex = /<a\s+(?:[^>]*?\s+)?href=["']([^"']*)["'][^>]*>(.*?)<\/a>/g;
-    
     if (htmlLinkRegex.test(text)) {
-        // If we have HTML links, parse and properly render them
         return text.replace(htmlLinkRegex, function(match, url, linkText) {
             return `<a href="${url}" target="_blank">${linkText}</a>`;
         });
     }
     
-    // Special handling for Google Drive links
-    const driveRegex = /(https:\/\/drive\.google\.com\/[^\s]+)/g;
-    if (driveRegex.test(text)) {
-        return text.replace(driveRegex, url => {
-            // Extract filename or give a default name
-            let linkText = "View Google Drive File";
-            
-            // Try to extract a better name from the URL if possible
-            if (url.includes('/file/d/')) {
-                // For direct file links, use a friendly title
-                linkText = "Open Document";
-            } else if (url.includes('/folder/')) {
-                // For folder links
-                linkText = "Open Folder";
-            } else if (url.includes('spreadsheets')) {
-                linkText = "Open Spreadsheet";
-            } else if (url.includes('document')) {
-                linkText = "Open Document";
-            } else if (url.includes('presentation')) {
-                linkText = "Open Presentation";
-            }
-            
-            return `<a href="${url}" target="_blank">${linkText}</a>`;
-        });
+    // Check for "Name | URL" pattern (text and URL separated by pipe)
+    const pipePattern = /^(.+?)\s*\|\s*(https?:\/\/[^\s]+)$/;
+    const pipeMatch = text.match(pipePattern);
+    if (pipeMatch) {
+        const linkText = pipeMatch[1].trim();
+        const url = pipeMatch[2].trim();
+        return `<a href="${url}" target="_blank">${linkText}</a>`;
     }
     
-    // For regular URLs
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    // Check for "Name: URL" pattern
+    const colonPattern = /^(.+?)\s*:\s*(https?:\/\/[^\s]+)$/;
+    const colonMatch = text.match(colonPattern);
+    if (colonMatch) {
+        const linkText = colonMatch[1].trim();
+        const url = colonMatch[2].trim();
+        return `<a href="${url}" target="_blank">${linkText}</a>`;
+    }
+    
+    // Check if this is just a URL - in which case we display it as is but make it clickable
+    const urlRegex = /^(https?:\/\/[^\s]+)$/;
     if (urlRegex.test(text)) {
-        return text.replace(urlRegex, url => `<a href="${url}" target="_blank">${url}</a>`);
+        return `<a href="${text}" target="_blank">${text}</a>`;
     }
     
     // Return the original text if no links are found
