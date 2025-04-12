@@ -1537,52 +1537,63 @@
             return 'Pending'; // Default if no status is found
         }
 
-        // Populate Subject Activities - FIXED: Now checking any status1, status2 fields
-        function populateSubjectActivities(data) {
-            const tbody = document.getElementById('subjectActivitiesTable');
-            tbody.innerHTML = '';
+       // Helper function to convert URLs in text to clickable links
+function makeLinksClickable(text) {
+    if (!text || text === '-') return text;
+    
+    // Regular expression to match URLs
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    
+    // Replace URLs with clickable links
+    return text.replace(urlRegex, url => `<a href="${url}" target="_blank">${url}</a>`);
+}
 
-            if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No subject activities available.</td></tr>';
-                return;
-            }
+// Populate Subject Activities - FIXED: Now checking any status1, status2 fields
+function populateSubjectActivities(data) {
+    const tbody = document.getElementById('subjectActivitiesTable');
+    tbody.innerHTML = '';
 
-            console.log('Populating subject activities with data:', data);
+    if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No subject activities available.</td></tr>';
+        return;
+    }
 
-            data.forEach(activity => {
-                // Debug: Log all keys to find status fields
-                console.log(`Activity keys for ${activity.subject || 'unknown'}:`, Object.keys(activity));
-                
-                // Find any property that might contain status
-                const statusValue = findActivityStatus(activity);
-                console.log(`Found status value: "${statusValue}"`);
-                
-                // Normalize the found status
-                const status = (statusValue || '').toLowerCase().trim();
-                console.log(`Normalized status: "${status}"`);
-                
-                // Simple direct comparison, exactly like the assignments function
-                const statusClass = status === 'complete' ? 'status-complete' : 
-                               status === 'pending' ? 'status-pending' : 'status-overdue';
-                
-                // Use the original status text with proper capitalization for display
-                const statusText = statusValue 
-                    ? statusValue.charAt(0).toUpperCase() + statusValue.slice(1).toLowerCase()
-                    : 'Pending';
-                
-                console.log(`Final status for ${activity.subject}: class=${statusClass}, text=${statusText}`);
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${activity.subject || 'Unknown'}</td>
-                    <td>${activity.activity || 'Unknown'}</td>
-                    <td>${activity.date || '-'}</td>
-                    <td>${activity.description || '-'}</td>
-                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
+    console.log('Populating subject activities with data:', data);
+
+    data.forEach(activity => {
+        // Debug: Log all keys to find status fields
+        console.log(`Activity keys for ${activity.subject || 'unknown'}:`, Object.keys(activity));
+        
+        // Find any property that might contain status
+        const statusValue = findActivityStatus(activity);
+        console.log(`Found status value: "${statusValue}"`);
+        
+        // Normalize the found status
+        const status = (statusValue || '').toLowerCase().trim();
+        console.log(`Normalized status: "${status}"`);
+        
+        // Simple direct comparison, exactly like the assignments function
+        const statusClass = status === 'complete' ? 'status-complete' : 
+                       status === 'pending' ? 'status-pending' : 'status-overdue';
+        
+        // Use the original status text with proper capitalization for display
+        const statusText = statusValue 
+            ? statusValue.charAt(0).toUpperCase() + statusValue.slice(1).toLowerCase()
+            : 'Pending';
+        
+        console.log(`Final status for ${activity.subject}: class=${statusClass}, text=${statusText}`);
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${activity.subject || 'Unknown'}</td>
+            <td>${activity.activity || 'Unknown'}</td>
+            <td>${activity.date || '-'}</td>
+            <td>${makeLinksClickable(activity.description) || '-'}</td>
+            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+        `;
+        tbody.appendChild(row);
+    });
+}
 
         // Populate Assignments
         function populateAssignments(data) {
