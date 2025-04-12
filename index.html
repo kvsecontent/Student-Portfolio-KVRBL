@@ -1537,19 +1537,28 @@
             return 'Pending'; // Default if no status is found
         }
 
-      // Helper function to convert text in Description to clickable links
+     // Function to handle HTML links stored as text in description
 function makeLinksClickable(text) {
     if (!text || text === '-') return text;
     
-    // First check if it's already a URL
+    // First check if this contains HTML links
+    const htmlLinkRegex = /<a\s+(?:[^>]*?\s+)?href=["']([^"']*)["'][^>]*>(.*?)<\/a>/g;
+    
+    if (htmlLinkRegex.test(text)) {
+        // If we have HTML links, parse and properly render them
+        return text.replace(htmlLinkRegex, function(match, url, linkText) {
+            return `<a href="${url}" target="_blank">${linkText}</a>`;
+        });
+    }
+    
+    // For plain URLs
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     if (urlRegex.test(text)) {
         return text.replace(urlRegex, url => `<a href="${url}" target="_blank">${url}</a>`);
-    } 
-    // If not a URL, make the whole text clickable to a search page
-    else {
-        return `<a href="https://www.google.com/search?q=${encodeURIComponent(text)}" target="_blank">${text}</a>`;
     }
+    
+    // Return the original text if no links are found
+    return text;
 }
 
 // Populate Subject Activities - FIXED: Now checking any status1, status2 fields
