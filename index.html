@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Portfolio | PM SHRI KENDRIYA VIDYALAYA RAEBARELI</title>
+    <title>Student Portfolio | PM SHRI KENDRIYA VIDYALAYA LUCKNOW</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -725,7 +725,7 @@
                 <img src="https://i.ibb.co/23DtsDdF/kvs-logo-new.jpg" alt="School Logo">
             </div>
             <h2 class="login-title">Student Portfolio</h2>
-            <p class="login-subtitle">PM SHRI KENDRIYA VIDYALAYA, RAEBARELI</p>
+            <p class="login-subtitle">PM SHRI KENDRIYA VIDYALAYA, LUCKNOW</p>
             
             <form class="login-form" id="loginForm" onsubmit="return false;">
                 <input type="text" class="login-input" id="admissionInput" placeholder="Enter 5-digit Admission Number" maxlength="5">
@@ -749,7 +749,7 @@
                     </div>
                     <div class="school-name">
                         <h1>PM SHRI KENDRIYA VIDYALAYA</h1>
-                        <p>RAEBARELI</p>
+                        <p>LUCKNOW</p>
                     </div>
                 </div>
                 <div class="user-actions">
@@ -802,6 +802,7 @@
                 <div class="nav-tab" data-tab="corrections">Copy Corrections</div>
                 <div class="nav-tab" data-tab="attendance">Attendance</div>
                 <div class="nav-tab" data-tab="discipline">Discipline</div>
+                <div class="nav-tab" data-tab="games">Interactive Games</div>
             </div>
 
             <!-- Dashboard Section -->
@@ -902,12 +903,13 @@
                                 <th>Date</th>
                                 <th>Description</th>
                                 <th>Status</th>
+                                <th>Remark</th>
                             </tr>
                         </thead>
                         <tbody id="subjectActivitiesTable">
                             <!-- Will be populated by JavaScript -->
                             <tr>
-                                <td colspan="5" class="loading">
+                                <td colspan="6" class="loading">
                                     <div class="spinner"></div>
                                 </td>
                             </tr>
@@ -1095,11 +1097,89 @@
                     </table>
                 </div>
             </section>
+
+            <!-- Interactive Games Section -->
+            <section class="content-section" id="games">
+                <div class="section-header">
+                    <h2 class="section-title">Interactive Games</h2>
+                    <div class="section-actions">
+                        <select class="filter-dropdown" id="gameSubjectFilter">
+                            <option value="all">All Subjects</option>
+                        </select>
+                        <select class="filter-dropdown" id="gameStatusFilter">
+                            <option value="all">All Status</option>
+                            <option value="complete">Completed</option>
+                            <option value="pending">Pending</option>
+                            <option value="overdue">Overdue</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Game Name</th>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gamesTable">
+                            <!-- Will be populated by JavaScript -->
+                            <tr>
+                                <td colspan="5" class="loading">
+                                    <div class="spinner"></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Interactive Games Section -->
+            <section class="content-section" id="games">
+                <div class="section-header">
+                    <h2 class="section-title">Interactive Games</h2>
+                    <div class="section-actions">
+                        <select class="filter-dropdown" id="gameSubjectFilter">
+                            <option value="all">All Subjects</option>
+                        </select>
+                        <select class="filter-dropdown" id="gameStatusFilter">
+                            <option value="all">All Status</option>
+                            <option value="complete">Completed</option>
+                            <option value="pending">Pending</option>
+                            <option value="overdue">Overdue</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Game Name</th>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gamesTable">
+                            <!-- Will be populated by JavaScript -->
+                            <tr>
+                                <td colspan="5" class="loading">
+                                    <div class="spinner"></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
         </main>
 
         <footer>
             <div class="container">
-                <p>&copy; 2025 PM SHRI KENDRIYA VIDYALAYA, RAEBARELI. All rights reserved.</p>
+                <p>&copy; 2025 PM SHRI KENDRIYA VIDYALAYA, LUCKNOW. All rights reserved.</p>
             </div>
         </footer>
     </div>
@@ -1209,7 +1289,7 @@
 
         // IMPROVED: Fetch data function with better error handling for horizontal data structure
         async function fetchData() {
-            const API_BASE_URL = 'https://student-portfolio-api.onrender.com';
+            const API_BASE_URL = 'https://student-port-api.onrender.com';
             
             try {
                 // Get the admission number from localStorage
@@ -1287,7 +1367,8 @@
                     tests: [],
                     corrections: [],
                     attendance: [],
-                    discipline: [] // Add empty discipline array
+                    discipline: [], // Add empty discipline array
+                    games: [] // Add empty games array for the new tab
                 };
             }
         }
@@ -1351,6 +1432,18 @@
             if (!Array.isArray(data.discipline)) {
                 console.warn('discipline is not an array');
                 data.discipline = [];
+            }
+            
+            // Add validation for interactive games
+            if (!Array.isArray(data.games)) {
+                console.warn('games is not an array');
+                data.games = [];
+            }
+            
+            // Add validation for interactive games
+            if (!Array.isArray(data.games)) {
+                console.warn('games is not an array');
+                data.games = [];
             }
             
             // Check summary object
@@ -1537,92 +1630,93 @@
             return 'Pending'; // Default if no status is found
         }
 
-   // Enhanced function to handle links with custom display names
-function makeLinksClickable(text) {
-    if (!text || text === '-') return text;
-    
-    // Check for HTML links
-    const htmlLinkRegex = /<a\s+(?:[^>]*?\s+)?href=["']([^"']*)["'][^>]*>(.*?)<\/a>/g;
-    if (htmlLinkRegex.test(text)) {
-        return text.replace(htmlLinkRegex, function(match, url, linkText) {
-            return `<a href="${url}" target="_blank">${linkText}</a>`;
-        });
-    }
-    
-    // Check for "Name | URL" pattern (text and URL separated by pipe)
-    const pipePattern = /^(.+?)\s*\|\s*(https?:\/\/[^\s]+)$/;
-    const pipeMatch = text.match(pipePattern);
-    if (pipeMatch) {
-        const linkText = pipeMatch[1].trim();
-        const url = pipeMatch[2].trim();
-        return `<a href="${url}" target="_blank">${linkText}</a>`;
-    }
-    
-    // Check for "Name: URL" pattern
-    const colonPattern = /^(.+?)\s*:\s*(https?:\/\/[^\s]+)$/;
-    const colonMatch = text.match(colonPattern);
-    if (colonMatch) {
-        const linkText = colonMatch[1].trim();
-        const url = colonMatch[2].trim();
-        return `<a href="${url}" target="_blank">${linkText}</a>`;
-    }
-    
-    // Check if this is just a URL - in which case we display it as is but make it clickable
-    const urlRegex = /^(https?:\/\/[^\s]+)$/;
-    if (urlRegex.test(text)) {
-        return `<a href="${text}" target="_blank">${text}</a>`;
-    }
-    
-    // Return the original text if no links are found
-    return text;
-}
+        // Enhanced function to handle links with custom display names
+        function makeLinksClickable(text) {
+            if (!text || text === '-') return text;
+            
+            // Check for HTML links
+            const htmlLinkRegex = /<a\s+(?:[^>]*?\s+)?href=["']([^"']*)["'][^>]*>(.*?)<\/a>/g;
+            if (htmlLinkRegex.test(text)) {
+                return text.replace(htmlLinkRegex, function(match, url, linkText) {
+                    return `<a href="${url}" target="_blank">${linkText}</a>`;
+                });
+            }
+            
+            // Check for "Name | URL" pattern (text and URL separated by pipe)
+            const pipePattern = /^(.+?)\s*\|\s*(https?:\/\/[^\s]+)$/;
+            const pipeMatch = text.match(pipePattern);
+            if (pipeMatch) {
+                const linkText = pipeMatch[1].trim();
+                const url = pipeMatch[2].trim();
+                return `<a href="${url}" target="_blank">${linkText}</a>`;
+            }
+            
+            // Check for "Name: URL" pattern
+            const colonPattern = /^(.+?)\s*:\s*(https?:\/\/[^\s]+)$/;
+            const colonMatch = text.match(colonPattern);
+            if (colonMatch) {
+                const linkText = colonMatch[1].trim();
+                const url = colonMatch[2].trim();
+                return `<a href="${url}" target="_blank">${linkText}</a>`;
+            }
+            
+            // Check if this is just a URL - in which case we display it as is but make it clickable
+            const urlRegex = /^(https?:\/\/[^\s]+)$/;
+            if (urlRegex.test(text)) {
+                return `<a href="${text}" target="_blank">${text}</a>`;
+            }
+            
+            // Return the original text if no links are found
+            return text;
+        }
 
-// Populate Subject Activities - FIXED: Now checking any status1, status2 fields
-function populateSubjectActivities(data) {
-    const tbody = document.getElementById('subjectActivitiesTable');
-    tbody.innerHTML = '';
+        // Populate Subject Activities - Updated to include Remarks column
+        function populateSubjectActivities(data) {
+            const tbody = document.getElementById('subjectActivitiesTable');
+            tbody.innerHTML = '';
 
-    if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No subject activities available.</td></tr>';
-        return;
-    }
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No subject activities available.</td></tr>';
+                return;
+            }
 
-    console.log('Populating subject activities with data:', data);
+            console.log('Populating subject activities with data:', data);
 
-    data.forEach(activity => {
-        // Debug: Log all keys to find status fields
-        console.log(`Activity keys for ${activity.subject || 'unknown'}:`, Object.keys(activity));
-        
-        // Find any property that might contain status
-        const statusValue = findActivityStatus(activity);
-        console.log(`Found status value: "${statusValue}"`);
-        
-        // Normalize the found status
-        const status = (statusValue || '').toLowerCase().trim();
-        console.log(`Normalized status: "${status}"`);
-        
-        // Simple direct comparison, exactly like the assignments function
-        const statusClass = status === 'complete' ? 'status-complete' : 
-                       status === 'pending' ? 'status-pending' : 'status-overdue';
-        
-        // Use the original status text with proper capitalization for display
-        const statusText = statusValue 
-            ? statusValue.charAt(0).toUpperCase() + statusValue.slice(1).toLowerCase()
-            : 'Pending';
-        
-        console.log(`Final status for ${activity.subject}: class=${statusClass}, text=${statusText}`);
-        
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${activity.subject || 'Unknown'}</td>
-            <td>${activity.activity || 'Unknown'}</td>
-            <td>${activity.date || '-'}</td>
-            <td>${makeLinksClickable(activity.description) || '-'}</td>
-            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-        `;
-        tbody.appendChild(row);
-    });
-}
+            data.forEach(activity => {
+                // Debug: Log all keys to find status fields
+                console.log(`Activity keys for ${activity.subject || 'unknown'}:`, Object.keys(activity));
+                
+                // Find any property that might contain status
+                const statusValue = findActivityStatus(activity);
+                console.log(`Found status value: "${statusValue}"`);
+                
+                // Normalize the found status
+                const status = (statusValue || '').toLowerCase().trim();
+                console.log(`Normalized status: "${status}"`);
+                
+                // Simple direct comparison, exactly like the assignments function
+                const statusClass = status === 'complete' ? 'status-complete' : 
+                                status === 'pending' ? 'status-pending' : 'status-overdue';
+                
+                // Use the original status text with proper capitalization for display
+                const statusText = statusValue 
+                    ? statusValue.charAt(0).toUpperCase() + statusValue.slice(1).toLowerCase()
+                    : 'Pending';
+                
+                console.log(`Final status for ${activity.subject}: class=${statusClass}, text=${statusText}`);
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${activity.subject || 'Unknown'}</td>
+                    <td>${activity.activity || 'Unknown'}</td>
+                    <td>${activity.date || '-'}</td>
+                    <td>${makeLinksClickable(activity.description) || '-'}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>${activity.remark || '-'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
 
         // Populate Assignments
         function populateAssignments(data) {
@@ -1763,7 +1857,7 @@ function populateSubjectActivities(data) {
             return 'Pending'; // Default if no status is found
         }
 
-        // Populate Discipline Records - NEW
+        // Populate Discipline Records
         function populateDiscipline(data) {
             const tbody = document.getElementById('disciplineTable');
             tbody.innerHTML = '';
@@ -1817,6 +1911,41 @@ function populateSubjectActivities(data) {
             });
         }
 
+        // Populate Interactive Games - NEW
+        function populateGames(data) {
+            const tbody = document.getElementById('gamesTable');
+            tbody.innerHTML = '';
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No interactive games data available.</td></tr>';
+                return;
+            }
+
+            console.log('Populating games data:', data);
+
+            data.forEach(game => {
+                // Normalize status to lowercase and trim any whitespace
+                const status = (game.status || '').toLowerCase().trim();
+                const statusClass = status === 'complete' || status === 'completed' ? 'status-complete' : 
+                                 status === 'pending' ? 'status-pending' : 'status-overdue';
+                
+                // Use the original status text with proper capitalization for display
+                const statusText = game.status 
+                    ? game.status.charAt(0).toUpperCase() + game.status.slice(1).toLowerCase()
+                    : 'Pending';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${game.subject || 'Unknown'}</td>
+                    <td>${game.name || 'Unknown'}</td>
+                    <td>${game.date || '-'}</td>
+                    <td>${makeLinksClickable(game.description) || '-'}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
         // Filter handlers - Updated for better error handling with empty arrays
         function setupFilters(data) {
             // Get unique subjects from all data
@@ -1834,6 +1963,7 @@ function populateSubjectActivities(data) {
             updateFilterOptions('correctionSubjectFilter', subjects);
             updateFilterOptions('attendanceMonthFilter', months);
             updateFilterOptions('disciplineTypeFilter', disciplineTypes);
+            updateFilterOptions('gameSubjectFilter', subjects);
             
             // Subject filter for activities - uses same approach for consistency
             document.getElementById('subjectFilter').addEventListener('change', e => {
@@ -1905,6 +2035,16 @@ function populateSubjectActivities(data) {
             document.getElementById('disciplineStatusFilter').addEventListener('change', e => {
                 applyDisciplineFilters(data);
             });
+            
+            // Games subject filter
+            document.getElementById('gameSubjectFilter').addEventListener('change', e => {
+                applyGameFilters(data);
+            });
+            
+            // Games status filter
+            document.getElementById('gameStatusFilter').addEventListener('change', e => {
+                applyGameFilters(data);
+            });
         }
         
         // Apply both discipline filters together
@@ -1928,6 +2068,33 @@ function populateSubjectActivities(data) {
             }
             
             populateDiscipline(filteredData);
+        }
+        
+        // Apply both game filters together
+        function applyGameFilters(data) {
+            const selectedSubject = document.getElementById('gameSubjectFilter').value;
+            const selectedStatus = document.getElementById('gameStatusFilter').value;
+            
+            let filteredData = data.games || [];
+            
+            // Apply subject filter
+            if (selectedSubject !== 'all' && filteredData.length > 0) {
+                filteredData = filteredData.filter(game => game.subject === selectedSubject);
+            }
+            
+            // Apply status filter
+            if (selectedStatus !== 'all' && filteredData.length > 0) {
+                filteredData = filteredData.filter(game => {
+                    const status = (game.status || '').toLowerCase().trim();
+                    if (selectedStatus === 'complete' || selectedStatus === 'completed') {
+                        return status === 'complete' || status === 'completed';
+                    } else {
+                        return status === selectedStatus;
+                    }
+                });
+            }
+            
+            populateGames(filteredData);
         }
         
         // Helper function to get unique subjects across all data
@@ -1961,6 +2128,20 @@ function populateSubjectActivities(data) {
             
             if (data.corrections && Array.isArray(data.corrections)) {
                 data.corrections.forEach(item => {
+                    if (item && item.subject) subjects.add(item.subject);
+                });
+            }
+            
+            // Add subjects from games
+            if (data.games && Array.isArray(data.games)) {
+                data.games.forEach(item => {
+                    if (item && item.subject) subjects.add(item.subject);
+                });
+            }
+            
+            // Add subjects from games
+            if (data.games && Array.isArray(data.games)) {
+                data.games.forEach(item => {
                     if (item && item.subject) subjects.add(item.subject);
                 });
             }
@@ -2027,6 +2208,48 @@ function populateSubjectActivities(data) {
                 
                 const data = await fetchData();
                 
+                // Add sample interactive games data if not present from API
+                if (!data.games || data.games.length === 0) {
+                    console.log('Adding sample interactive games data');
+                    data.games = [
+                        {
+                            subject: "Mathematics",
+                            name: "Equation Solver",
+                            date: "15-04-2025",
+                            description: "Interactive equation solving game | https://example.com/games/math-equations",
+                            status: "Completed"
+                        },
+                        {
+                            subject: "Science",
+                            name: "Periodic Table Challenge",
+                            date: "10-04-2025",
+                            description: "Learn elements with this interactive game | https://example.com/games/periodic-table",
+                            status: "Completed"
+                        },
+                        {
+                            subject: "English",
+                            name: "Vocabulary Builder",
+                            date: "20-04-2025",
+                            description: "Improve vocabulary with gamified learning | https://example.com/games/vocabulary",
+                            status: "Pending"
+                        },
+                        {
+                            subject: "History",
+                            name: "Timeline Explorer",
+                            date: "25-04-2025",
+                            description: "Explore historical events through an interactive timeline | https://example.com/games/history",
+                            status: "Pending"
+                        },
+                        {
+                            subject: "Computer Science",
+                            name: "Coding Challenges",
+                            date: "05-03-2025",
+                            description: "Learn programming concepts through puzzles | https://example.com/games/coding",
+                            status: "Overdue"
+                        }
+                    ];
+                }
+                
                 // Hide all loading indicators
                 document.querySelectorAll('.loading').forEach(loader => {
                     loader.style.display = 'none';
@@ -2047,7 +2270,8 @@ function populateSubjectActivities(data) {
                 populateTests(data.tests || []);
                 populateCorrections(data.corrections || []);
                 populateAttendance(data.attendance || []);
-                populateDiscipline(data.discipline || []); // New discipline table
+                populateDiscipline(data.discipline || []); 
+                populateGames(data.games || []); // Populate the new games tab
                 
                 // Setup filters
                 setupFilters(data);
