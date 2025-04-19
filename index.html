@@ -1751,42 +1751,51 @@
             });
         }
 
-        // Populate Tests
-        function populateTests(data) {
-            const tbody = document.getElementById('testsTable');
-            tbody.innerHTML = '';
+        // Populate Tests - FIXED to properly handle decimal marks
+function populateTests(data) {
+    const tbody = document.getElementById('testsTable');
+    tbody.innerHTML = '';
 
-            if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No test data available.</td></tr>';
-                return;
-            }
+    if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No test data available.</td></tr>';
+        return;
+    }
 
-            data.forEach(test => {
-                // Ensure percentage is a valid number and format it
-                let percentage = 0;
-                if (test.percentage !== null && test.percentage !== undefined) {
-                    percentage = parseFloat(test.percentage);
-                    if (isNaN(percentage)) percentage = 0;
-                }
-                
-                const gradeClass = test.grade === 'A' ? 'grade-a' : 
-                                test.grade === 'B' ? 'grade-b' : 
-                                test.grade === 'C' ? 'grade-c' : 'grade-d';
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${test.subject || 'Unknown'}</td>
-                    <td>${test.name || 'Unknown'}</td>
-                    <td>${test.date || '-'}</td>
-                    <td>${test.maxMarks || '0'}</td>
-                    <td>${test.marksObtained || '0'}</td>
-                    <td>${percentage.toFixed(1)}%</td>
-                    <td><span class="grade-badge ${gradeClass}">${test.grade || '-'}</span></td>
-                `;
-                tbody.appendChild(row);
-            });
+    data.forEach(test => {
+        // Ensure percentage is a valid number and format it
+        let percentage = 0;
+        if (test.percentage !== null && test.percentage !== undefined) {
+            percentage = parseFloat(test.percentage);
+            if (isNaN(percentage)) percentage = 0;
         }
-
+        
+        // NEW: Properly handle marks obtained with decimals
+        let marksObtained = 0;
+        if (test.marksObtained !== null && test.marksObtained !== undefined) {
+            marksObtained = parseFloat(test.marksObtained);
+            if (isNaN(marksObtained)) marksObtained = 0;
+        }
+        
+        // NEW: Display decimals only if they exist (e.g. 10.5 as 10.5, but 10.0 as 10)
+        const marksDisplay = marksObtained % 1 === 0 ? marksObtained.toString() : marksObtained.toFixed(1);
+        
+        const gradeClass = test.grade === 'A' ? 'grade-a' : 
+                        test.grade === 'B' ? 'grade-b' : 
+                        test.grade === 'C' ? 'grade-c' : 'grade-d';
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${test.subject || 'Unknown'}</td>
+            <td>${test.name || 'Unknown'}</td>
+            <td>${test.date || '-'}</td>
+            <td>${test.maxMarks || '0'}</td>
+            <td>${marksDisplay}</td>
+            <td>${percentage.toFixed(1)}%</td>
+            <td><span class="grade-badge ${gradeClass}">${test.grade || '-'}</span></td>
+        `;
+        tbody.appendChild(row);
+    });
+}
         // Populate Copy Corrections
         function populateCorrections(data) {
             const tbody = document.getElementById('correctionsTable');
