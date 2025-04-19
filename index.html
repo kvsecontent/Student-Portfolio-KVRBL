@@ -1583,7 +1583,7 @@
             });
         }
 debugTestData(data);
-       // Also modify the populateRecentTests function for consistency
+     // Enhanced version of populateRecentTests function with the same fixes
 function populateRecentTests(data) {
     const tbody = document.getElementById('recentTestsTable');
     tbody.innerHTML = '';
@@ -1593,20 +1593,53 @@ function populateRecentTests(data) {
         return;
     }
 
+    // Debug overall data
+    console.log('Recent tests data before processing:', JSON.stringify(data).substring(0, 500) + '...');
+
     data.forEach(test => {
+        // Debug each test object
+        console.log('Processing recent test:', test.subject, test.name, 'Marks:', test.marks);
+        
         const gradeClass = test.grade === 'A' ? 'grade-a' : 
                         test.grade === 'B' ? 'grade-b' : 
                         test.grade === 'C' ? 'grade-c' : 'grade-d';
         
-        // Parse marks as float and display with one decimal place if it has a decimal part
+        // ENHANCED MARKS HANDLING - Try multiple potential property names
         let marks = 0;
+        // Check standard property name first
         if (test.marks !== null && test.marks !== undefined) {
             marks = parseFloat(test.marks);
-            if (isNaN(marks)) marks = 0;
+        } 
+        // Then try alternative property names
+        else {
+            for (const key in test) {
+                if (key.toLowerCase().includes('mark') && !key.toLowerCase().includes('max')) {
+                    console.log('Found alternative marks property:', key, test[key]);
+                    const parsedValue = parseFloat(test[key]);
+                    if (!isNaN(parsedValue)) {
+                        marks = parsedValue;
+                        break;
+                    }
+                }
+            }
         }
         
-        // Format marks: if it's a whole number, show as integer; if decimal, show with one decimal place
-        const formattedMarks = marks % 1 === 0 ? marks.toString() : marks.toFixed(1);
+        if (isNaN(marks)) marks = 0;
+        
+        // Log the extracted value
+        console.log('Final marks value:', marks, 'Has decimal?', marks % 1 !== 0);
+        
+        // Format marks with special handling for integers vs decimals
+        let formattedMarks;
+        if (marks % 1 === 0) {
+            // It's a whole number, display without decimal
+            formattedMarks = Math.round(marks).toString();
+        } else {
+            // It has a decimal part, show with one decimal place
+            formattedMarks = marks.toFixed(1);
+        }
+        
+        console.log('Formatted marks display:', formattedMarks);
         
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -1619,6 +1652,7 @@ function populateRecentTests(data) {
         tbody.appendChild(row);
     });
 }
+
 
         // Find the status value from any status property in the activity object
         function findActivityStatus(activity) {
@@ -1761,7 +1795,7 @@ function populateRecentTests(data) {
             });
         }
 debugTestData(data);
-     // Modify the populateTests function to correctly display decimal marks
+   // Enhanced version of populateTests function with additional debugging and fixes
 function populateTests(data) {
     const tbody = document.getElementById('testsTable');
     tbody.innerHTML = '';
@@ -1771,7 +1805,13 @@ function populateTests(data) {
         return;
     }
 
+    // Debug overall data
+    console.log('Tests data before processing:', JSON.stringify(data).substring(0, 500) + '...');
+
     data.forEach(test => {
+        // Debug each test object 
+        console.log('Processing test:', test.subject, test.name, 'Marks:', test.marksObtained);
+        
         // Ensure percentage is a valid number and format it
         let percentage = 0;
         if (test.percentage !== null && test.percentage !== undefined) {
@@ -1783,15 +1823,42 @@ function populateTests(data) {
                         test.grade === 'B' ? 'grade-b' : 
                         test.grade === 'C' ? 'grade-c' : 'grade-d';
         
-        // Parse marks obtained as float and display with one decimal place if it has a decimal part
+        // ENHANCED MARKS HANDLING - Try multiple potential property names
         let marksObtained = 0;
+        // First check standard property name
         if (test.marksObtained !== null && test.marksObtained !== undefined) {
             marksObtained = parseFloat(test.marksObtained);
-            if (isNaN(marksObtained)) marksObtained = 0;
+        } 
+        // Then try alternative property names that might contain marks
+        else {
+            for (const key in test) {
+                if (key.toLowerCase().includes('mark') && key.toLowerCase().includes('obtain')) {
+                    console.log('Found alternative marks property:', key, test[key]);
+                    const parsedValue = parseFloat(test[key]);
+                    if (!isNaN(parsedValue)) {
+                        marksObtained = parsedValue;
+                        break;
+                    }
+                }
+            }
         }
         
-        // Format marks: if it's a whole number, show as integer; if decimal, show with one decimal place
-        const formattedMarks = marksObtained % 1 === 0 ? marksObtained.toString() : marksObtained.toFixed(1);
+        if (isNaN(marksObtained)) marksObtained = 0;
+        
+        // Log the extracted value
+        console.log('Final marksObtained value:', marksObtained, 'Has decimal?', marksObtained % 1 !== 0);
+        
+        // Format marks with special handling for integers vs decimals
+        let formattedMarks;
+        if (marksObtained % 1 === 0) {
+            // It's a whole number, display without decimal
+            formattedMarks = Math.round(marksObtained).toString();
+        } else {
+            // It has a decimal part, show with one decimal place
+            formattedMarks = marksObtained.toFixed(1);
+        }
+        
+        console.log('Formatted marks display:', formattedMarks);
         
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -1806,6 +1873,7 @@ function populateTests(data) {
         tbody.appendChild(row);
     });
 }
+
 
         // Populate Copy Corrections
         function populateCorrections(data) {
