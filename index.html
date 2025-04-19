@@ -1583,32 +1583,42 @@
             });
         }
 
-        // Populate Recent Tests
-        function populateRecentTests(data) {
-            const tbody = document.getElementById('recentTestsTable');
-            tbody.innerHTML = '';
+       // Also modify the populateRecentTests function for consistency
+function populateRecentTests(data) {
+    const tbody = document.getElementById('recentTestsTable');
+    tbody.innerHTML = '';
 
-            if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No recent test data available.</td></tr>';
-                return;
-            }
+    if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No recent test data available.</td></tr>';
+        return;
+    }
 
-            data.forEach(test => {
-                const gradeClass = test.grade === 'A' ? 'grade-a' : 
-                                test.grade === 'B' ? 'grade-b' : 
-                                test.grade === 'C' ? 'grade-c' : 'grade-d';
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${test.subject || 'Unknown'}</td>
-                    <td>${test.name || 'Unknown'}</td>
-                    <td>${test.date || '-'}</td>
-                    <td>${test.marks || '-'}</td>
-                    <td><span class="grade-badge ${gradeClass}">${test.grade || '-'}</span></td>
-                `;
-                tbody.appendChild(row);
-            });
+    data.forEach(test => {
+        const gradeClass = test.grade === 'A' ? 'grade-a' : 
+                        test.grade === 'B' ? 'grade-b' : 
+                        test.grade === 'C' ? 'grade-c' : 'grade-d';
+        
+        // Parse marks as float and display with one decimal place if it has a decimal part
+        let marks = 0;
+        if (test.marks !== null && test.marks !== undefined) {
+            marks = parseFloat(test.marks);
+            if (isNaN(marks)) marks = 0;
         }
+        
+        // Format marks: if it's a whole number, show as integer; if decimal, show with one decimal place
+        const formattedMarks = marks % 1 === 0 ? marks.toString() : marks.toFixed(1);
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${test.subject || 'Unknown'}</td>
+            <td>${test.name || 'Unknown'}</td>
+            <td>${test.date || '-'}</td>
+            <td>${formattedMarks}</td>
+            <td><span class="grade-badge ${gradeClass}">${test.grade || '-'}</span></td>
+        `;
+        tbody.appendChild(row);
+    });
+}
 
         // Find the status value from any status property in the activity object
         function findActivityStatus(activity) {
@@ -1751,41 +1761,51 @@
             });
         }
 
-        // Populate Tests
-        function populateTests(data) {
-            const tbody = document.getElementById('testsTable');
-            tbody.innerHTML = '';
+     // Modify the populateTests function to correctly display decimal marks
+function populateTests(data) {
+    const tbody = document.getElementById('testsTable');
+    tbody.innerHTML = '';
 
-            if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No test data available.</td></tr>';
-                return;
-            }
+    if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No test data available.</td></tr>';
+        return;
+    }
 
-            data.forEach(test => {
-                // Ensure percentage is a valid number and format it
-                let percentage = 0;
-                if (test.percentage !== null && test.percentage !== undefined) {
-                    percentage = parseFloat(test.percentage);
-                    if (isNaN(percentage)) percentage = 0;
-                }
-                
-                const gradeClass = test.grade === 'A' ? 'grade-a' : 
-                                test.grade === 'B' ? 'grade-b' : 
-                                test.grade === 'C' ? 'grade-c' : 'grade-d';
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${test.subject || 'Unknown'}</td>
-                    <td>${test.name || 'Unknown'}</td>
-                    <td>${test.date || '-'}</td>
-                    <td>${test.maxMarks || '0'}</td>
-                    <td>${test.marksObtained || '0'}</td>
-                    <td>${percentage.toFixed(1)}%</td>
-                    <td><span class="grade-badge ${gradeClass}">${test.grade || '-'}</span></td>
-                `;
-                tbody.appendChild(row);
-            });
+    data.forEach(test => {
+        // Ensure percentage is a valid number and format it
+        let percentage = 0;
+        if (test.percentage !== null && test.percentage !== undefined) {
+            percentage = parseFloat(test.percentage);
+            if (isNaN(percentage)) percentage = 0;
         }
+        
+        const gradeClass = test.grade === 'A' ? 'grade-a' : 
+                        test.grade === 'B' ? 'grade-b' : 
+                        test.grade === 'C' ? 'grade-c' : 'grade-d';
+        
+        // Parse marks obtained as float and display with one decimal place if it has a decimal part
+        let marksObtained = 0;
+        if (test.marksObtained !== null && test.marksObtained !== undefined) {
+            marksObtained = parseFloat(test.marksObtained);
+            if (isNaN(marksObtained)) marksObtained = 0;
+        }
+        
+        // Format marks: if it's a whole number, show as integer; if decimal, show with one decimal place
+        const formattedMarks = marksObtained % 1 === 0 ? marksObtained.toString() : marksObtained.toFixed(1);
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${test.subject || 'Unknown'}</td>
+            <td>${test.name || 'Unknown'}</td>
+            <td>${test.date || '-'}</td>
+            <td>${test.maxMarks || '0'}</td>
+            <td>${formattedMarks}</td>
+            <td>${percentage.toFixed(1)}%</td>
+            <td><span class="grade-badge ${gradeClass}">${test.grade || '-'}</span></td>
+        `;
+        tbody.appendChild(row);
+    });
+}
 
         // Populate Copy Corrections
         function populateCorrections(data) {
