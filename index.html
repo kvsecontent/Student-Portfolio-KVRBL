@@ -1582,7 +1582,7 @@
                 container.appendChild(card);
             });
         }
-// Enhanced populateRecentTests with the same decimal handling logic
+// Universal populateRecentTests with the same calculation approach
 function populateRecentTests(data) {
     const tbody = document.getElementById('recentTestsTable');
     tbody.innerHTML = '';
@@ -1597,24 +1597,13 @@ function populateRecentTests(data) {
                          test.grade === 'B' ? 'grade-b' : 
                          test.grade === 'C' ? 'grade-c' : 'grade-d';
         
-        // Get marks with potential decimal precision
+        // Always get marks from percentage calculation
         const marks = extractMarksWithDecimals(test);
         
-        // Format the marks appropriately
-        let formattedMarks;
-        if (marks % 1 === 0) {
-            // Whole number
-            formattedMarks = marks.toString();
-        } else {
-            // Has decimal part
-            formattedMarks = marks.toFixed(1);
-        }
-        
-        // Special case for bridge course assessment
-        if (test.name && test.name.includes("Bridge Course") && 
-            test.percentage === 35) {
-            formattedMarks = "10.5";
-        }
+        // Format with one decimal place if it has a decimal part
+        const formattedMarks = marks % 1 === 0 ? 
+                              marks.toString() : 
+                              marks.toFixed(1);
         
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -1769,9 +1758,21 @@ function populateRecentTests(data) {
             });
         }
 
-        // Function to check if there are any related properties with decimal information
+       // General solution that uses percentage-based calculation for all tests
 function extractMarksWithDecimals(test) {
-    // First try direct access to standard properties
+    // ALWAYS prioritize calculating from percentage when possible
+    if (test.percentage !== undefined && test.maxMarks !== undefined) {
+        const percentage = parseFloat(test.percentage);
+        const maxMarks = parseFloat(test.maxMarks);
+        
+        if (!isNaN(percentage) && !isNaN(maxMarks) && maxMarks > 0) {
+            // Calculate marks from percentage - this will preserve decimals
+            const calculatedMarks = (percentage / 100) * maxMarks;
+            return calculatedMarks; // Always return the calculated value, decimal or not
+        }
+    }
+    
+    // Fall back to direct values if percentage calculation isn't possible
     if (test.marksObtained !== undefined) {
         const parsed = parseFloat(test.marksObtained);
         if (!isNaN(parsed)) return parsed;
@@ -1782,38 +1783,11 @@ function extractMarksWithDecimals(test) {
         if (!isNaN(parsed)) return parsed;
     }
     
-    // Check if there's a percentage field to back-calculate the marks
-    if (test.percentage !== undefined && test.maxMarks !== undefined) {
-        const percentage = parseFloat(test.percentage);
-        const maxMarks = parseFloat(test.maxMarks);
-        
-        if (!isNaN(percentage) && !isNaN(maxMarks) && maxMarks > 0) {
-            // Calculate decimals from percentage (35.0% of 30 = 10.5)
-            const calculatedMarks = (percentage / 100) * maxMarks;
-            // Only return if the calculated value has decimals
-            if (calculatedMarks % 1 !== 0) {
-                return calculatedMarks;
-            }
-        }
-    }
-    
-    // Look for any property that might contain marks information
-    for (const key in test) {
-        // Find properties that have "mark" and "obtain" or similar in their name
-        if ((key.toLowerCase().includes('mark') || key.toLowerCase().includes('score')) && 
-            (key.toLowerCase().includes('obtain') || key.toLowerCase().includes('got') || 
-             key.toLowerCase().includes('achieve'))) {
-            
-            const parsed = parseFloat(test[key]);
-            if (!isNaN(parsed)) return parsed;
-        }
-    }
-    
-    // If no decimal version found, default to the original marks
+    // Default fallback
     return parseFloat(test.marksObtained || test.marks || 0);
 }
 
-// Enhanced populateTests function that works for all tests with decimal marks
+// Universal populateTests function that always calculates marks from percentage
 function populateTests(data) {
     const tbody = document.getElementById('testsTable');
     tbody.innerHTML = '';
@@ -1824,7 +1798,7 @@ function populateTests(data) {
     }
 
     data.forEach(test => {
-        // Ensure percentage is a valid number and format it
+        // Ensure percentage is a valid number
         let percentage = 0;
         if (test.percentage !== null && test.percentage !== undefined) {
             percentage = parseFloat(test.percentage);
@@ -1835,24 +1809,13 @@ function populateTests(data) {
                          test.grade === 'B' ? 'grade-b' : 
                          test.grade === 'C' ? 'grade-c' : 'grade-d';
         
-        // Get marks with potential decimal precision
+        // Always get marks from percentage calculation
         const marksObtained = extractMarksWithDecimals(test);
         
-        // Format the marks appropriately
-        let formattedMarks;
-        if (marksObtained % 1 === 0) {
-            // Whole number
-            formattedMarks = marksObtained.toString();
-        } else {
-            // Has decimal part
-            formattedMarks = marksObtained.toFixed(1);
-        }
-        
-        // If this is the bridge course assessment with specific known values
-        if (test.name && test.name.includes("Bridge Course") && 
-            test.maxMarks === "30" && percentage === 35) {
-            formattedMarks = "10.5";
-        }
+        // Format with one decimal place if it has a decimal part
+        const formattedMarks = marksObtained % 1 === 0 ? 
+                              marksObtained.toString() : 
+                              marksObtained.toFixed(1);
         
         const row = document.createElement('tr');
         row.innerHTML = `
