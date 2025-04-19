@@ -1582,9 +1582,21 @@
                 container.appendChild(card);
             });
         }
-// Function to check if there are any related properties with decimal information
+ // General solution that uses percentage-based calculation for all tests
 function extractMarksWithDecimals(test) {
-    // First try direct access to standard properties
+    // ALWAYS prioritize calculating from percentage when possible
+    if (test.percentage !== undefined && test.maxMarks !== undefined) {
+        const percentage = parseFloat(test.percentage);
+        const maxMarks = parseFloat(test.maxMarks);
+        
+        if (!isNaN(percentage) && !isNaN(maxMarks) && maxMarks > 0) {
+            // Calculate marks from percentage - this will preserve decimals
+            const calculatedMarks = (percentage / 100) * maxMarks;
+            return calculatedMarks; // Always return the calculated value, decimal or not
+        }
+    }
+    
+    // Fall back to direct values if percentage calculation isn't possible
     if (test.marksObtained !== undefined) {
         const parsed = parseFloat(test.marksObtained);
         if (!isNaN(parsed)) return parsed;
@@ -1595,36 +1607,9 @@ function extractMarksWithDecimals(test) {
         if (!isNaN(parsed)) return parsed;
     }
     
-    // Check if there's a percentage field to back-calculate the marks
-    if (test.percentage !== undefined && test.maxMarks !== undefined) {
-        const percentage = parseFloat(test.percentage);
-        const maxMarks = parseFloat(test.maxMarks);
-        
-        if (!isNaN(percentage) && !isNaN(maxMarks) && maxMarks > 0) {
-            // Calculate decimals from percentage (35.0% of 30 = 10.5)
-            const calculatedMarks = (percentage / 100) * maxMarks;
-            // Only return if the calculated value has decimals
-            if (calculatedMarks % 1 !== 0) {
-                return calculatedMarks;
-            }
-        }
-    }
-    
-    // Look for any property that might contain marks information
-    for (const key in test) {
-        // Find properties that have "mark" and "obtain" or similar in their name
-        if ((key.toLowerCase().includes('mark') || key.toLowerCase().includes('score')) && 
-            (key.toLowerCase().includes('obtain') || key.toLowerCase().includes('got') || 
-             key.toLowerCase().includes('achieve'))) {
-            
-            const parsed = parseFloat(test[key]);
-            if (!isNaN(parsed)) return parsed;
-        }
-    }
-    
-    // If no decimal version found, default to the original marks
+    // Default fallback
     return parseFloat(test.marksObtained || test.marks || 0);
-}
+} 
         // Enhanced populateRecentTests with the same decimal handling logic
 function populateRecentTests(data) {
     const tbody = document.getElementById('recentTestsTable');
