@@ -1582,7 +1582,7 @@
                 container.appendChild(card);
             });
         }
-// Custom fix for the Recent Tests section
+// Universal solution for Recent Tests section - no hardcoded values
 function populateRecentTests(data) {
     const tbody = document.getElementById('recentTestsTable');
     tbody.innerHTML = '';
@@ -1592,45 +1592,66 @@ function populateRecentTests(data) {
         return;
     }
 
-    console.log('Recent test data:', data); // Debug to see data structure
+    // Log all properties available in the first test to understand data structure
+    if (data.length > 0) {
+        console.log('Recent test data available properties:', Object.keys(data[0]));
+    }
 
     data.forEach(test => {
         const gradeClass = test.grade === 'A' ? 'grade-a' : 
-                         test.grade === 'B' ? 'grade-b' : 
-                         test.grade === 'C' ? 'grade-c' : 'grade-d';
+                           test.grade === 'B' ? 'grade-b' : 
+                           test.grade === 'C' ? 'grade-c' : 'grade-d';
         
-        // Debug: log all test properties
-        console.log('Processing recent test:', test);
-        
-        // Important: Force calculation from percentage for Bridge Course Assessment
-        // Note the property is likely 'marks' not 'marksObtained' in recent tests
+        // APPROACH: Try all possible ways to get the accurate mark value
         let marks = 0;
         
-        // First try percentage calculation
-        if (test.percentage !== undefined && test.maxMarks !== undefined) {
+        // First check if we can calculate from percentage
+        if (typeof test.percentage !== 'undefined' && typeof test.maxMarks !== 'undefined') {
             const percentage = parseFloat(test.percentage);
             const maxMarks = parseFloat(test.maxMarks);
             
             if (!isNaN(percentage) && !isNaN(maxMarks) && maxMarks > 0) {
                 marks = (percentage / 100) * maxMarks;
-                console.log('Calculated marks from percentage:', marks);
+                console.log(`Calculated marks for ${test.name}: ${marks} (${percentage}% of ${maxMarks})`);
             }
-        } 
-        // Special direct fix for Bridge Course Assessment
-        else if (test.name && test.name.includes("Bridge Course")) {
-            // Bridge Course is known to be 35% of 30 = 10.5
-            marks = 10.5;
-            console.log('Applied direct fix for Bridge Course:', marks);
-        }
-        // Fall back to direct property
-        else if (test.marks !== undefined) {
-            marks = parseFloat(test.marks);
-            console.log('Using direct marks property:', marks);
         }
         
-        // Format for display: whole numbers without decimal, numbers with decimals with one decimal place
+        // If we couldn't calculate from percentage, try to get from direct property
+        if (marks === 0) {
+            // Try all possible property names that might contain marks
+            const possibleMarkProps = ['marks', 'marksObtained', 'obtained', 'score'];
+            
+            for (const prop of possibleMarkProps) {
+                if (typeof test[prop] !== 'undefined') {
+                    const parsed = parseFloat(test[prop]);
+                    if (!isNaN(parsed)) {
+                        marks = parsed;
+                        console.log(`Using direct mark property "${prop}": ${marks}`);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Search through all properties for anything that might be marks
+        if (marks === 0) {
+            for (const key in test) {
+                if ((key.toLowerCase().includes('mark') || key.toLowerCase().includes('score') || 
+                     key.toLowerCase().includes('point')) && 
+                    !key.toLowerCase().includes('max')) {
+                    
+                    const parsed = parseFloat(test[key]);
+                    if (!isNaN(parsed)) {
+                        marks = parsed;
+                        console.log(`Found marks in property "${key}": ${marks}`);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Format mark value appropriately - with decimal only if it has a decimal part
         const formattedMarks = marks % 1 === 0 ? marks.toString() : marks.toFixed(1);
-        console.log('Formatted marks for display:', formattedMarks);
         
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -1643,7 +1664,46 @@ function populateRecentTests(data) {
         tbody.appendChild(row);
     });
 }
-        // Find the status value from any status property in the activity object
+
+// Add a helper function to check for recent tests structure when the data is first loaded
+function enhanceRecentTestsData(data) {
+    if (!data || !Array.isArray(data.recentTests) || data.recentTests.length === 0) {
+        return data;
+    }
+    
+    // If recent tests don't have maxMarks but tests do, copy them over
+    if (Array.isArray(data.tests) && data.tests.length > 0) {
+        // Create a lookup of max marks by test name
+        const maxMarksByTest = {};
+        const percentageByTest = {};
+        
+        data.tests.forEach(test => {
+            if (test.name && test.maxMarks) {
+                maxMarksByTest[test.name] = test.maxMarks;
+            }
+            if (test.name && test.percentage) {
+                percentageByTest[test.name] = test.percentage;
+            }
+        });
+        
+        // Update recent tests with max marks from main tests
+        data.recentTests.forEach(recentTest => {
+            if (recentTest.name) {
+                // Copy max marks if not present
+                if (!recentTest.maxMarks && maxMarksByTest[recentTest.name]) {
+                    recentTest.maxMarks = maxMarksByTest[recentTest.name];
+                }
+                
+                // Copy percentage if not present
+                if (!recentTest.percentage && percentageByTest[recentTest.name]) {
+                    recentTest.percentage = percentageByTest[recentTest.name];
+                }
+            }
+        });
+    }
+    
+    return data;
+}        // Find the status value from any status property in the activity object
         function findActivityStatus(activity) {
             // Check if there's a direct status property
             if (activity.status) {
