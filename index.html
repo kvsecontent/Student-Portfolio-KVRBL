@@ -1751,21 +1751,59 @@
             });
         }
 
-      // Replace the existing populateTests function with this implementation
-// This direct solution replaces all previous fixes
+     // Add this code right after your populateTests function to modify how marks are processed
 
-function populateTests(data) {
+// First, create a helper function to intercept and fix the data before display
+function fixDecimalMarks(data) {
+    if (!data || !Array.isArray(data)) return data;
+    
+    // Create a deep copy to avoid modifying the original data
+    const fixedData = JSON.parse(JSON.stringify(data));
+    
+    // Ensure decimal marks are preserved as strings
+    fixedData.forEach(test => {
+        // Convert marks to string to preserve decimal format
+        if (test.marksObtained) {
+            test.marksObtained = String(test.marksObtained);
+        }
+    });
+    
+    return fixedData;
+}
+
+// Override the fetchData function to fix decimal values in tests data
+const originalFetchData = fetchData;
+fetchData = async function() {
+    const data = await originalFetchData();
+    
+    // Fix decimal marks in tests data
+    if (data && Array.isArray(data.tests)) {
+        data.tests = fixDecimalMarks(data.tests);
+    }
+    
+    // Also fix decimal marks in recent tests
+    if (data && Array.isArray(data.recentTests)) {
+        data.recentTests = fixDecimalMarks(data.recentTests);
+    }
+    
+    return data;
+};
+
+// Replace the existing populateTests function with a version that preserves decimals
+const originalPopulateTests = populateTests;
+populateTests = function(data) {
+    // Ensure data has preserved decimal values
+    const fixedData = fixDecimalMarks(data);
+    
     const tbody = document.getElementById('testsTable');
     tbody.innerHTML = '';
 
-    if (!data || data.length === 0) {
+    if (!fixedData || fixedData.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No test data available.</td></tr>';
         return;
     }
 
-    console.log('Directly displaying test data:', data);
-
-    data.forEach(test => {
+    fixedData.forEach(test => {
         // For percentage calculation
         let percentage = 0;
         if (test.percentage !== null && test.percentage !== undefined) {
@@ -1773,8 +1811,7 @@ function populateTests(data) {
             if (isNaN(percentage)) percentage = 0;
         }
         
-        // IMPORTANT: The key fix - directly use the marks obtained WITHOUT converting
-        // This preserves the exact format (including decimals) as stored in the data
+        // IMPORTANT: Directly use the string value for display
         const marksDisplay = test.marksObtained || '0';
         
         const gradeClass = test.grade === 'A' ? 'grade-a' : 
@@ -1793,7 +1830,7 @@ function populateTests(data) {
         `;
         tbody.appendChild(row);
     });
-}
+};
         // Populate Copy Corrections
         function populateCorrections(data) {
             const tbody = document.getElementById('correctionsTable');
