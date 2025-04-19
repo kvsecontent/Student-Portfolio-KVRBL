@@ -1751,7 +1751,9 @@
             });
         }
 
-        // Populate Tests - FIXED to properly handle decimal marks
+      // Replace the existing populateTests function with this implementation
+// This direct solution replaces all previous fixes
+
 function populateTests(data) {
     const tbody = document.getElementById('testsTable');
     tbody.innerHTML = '';
@@ -1761,23 +1763,19 @@ function populateTests(data) {
         return;
     }
 
+    console.log('Directly displaying test data:', data);
+
     data.forEach(test => {
-        // Ensure percentage is a valid number and format it
+        // For percentage calculation
         let percentage = 0;
         if (test.percentage !== null && test.percentage !== undefined) {
             percentage = parseFloat(test.percentage);
             if (isNaN(percentage)) percentage = 0;
         }
         
-        // NEW: Properly handle marks obtained with decimals
-        let marksObtained = 0;
-        if (test.marksObtained !== null && test.marksObtained !== undefined) {
-            marksObtained = parseFloat(test.marksObtained);
-            if (isNaN(marksObtained)) marksObtained = 0;
-        }
-        
-        // NEW: Display decimals only if they exist (e.g. 10.5 as 10.5, but 10.0 as 10)
-        const marksDisplay = marksObtained % 1 === 0 ? marksObtained.toString() : marksObtained.toFixed(1);
+        // IMPORTANT: The key fix - directly use the marks obtained WITHOUT converting
+        // This preserves the exact format (including decimals) as stored in the data
+        const marksDisplay = test.marksObtained || '0';
         
         const gradeClass = test.grade === 'A' ? 'grade-a' : 
                         test.grade === 'B' ? 'grade-b' : 
